@@ -1,0 +1,1 @@
+: ${_CONF_GITHUB_DATE_TAG_FORMAT:="+%Y/%m/%d/%H/%M/%S"}

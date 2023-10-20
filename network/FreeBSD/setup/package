@@ -1,0 +1,10 @@
+arp-scan
+bind-tools
+ntraceroute
+whois
+bmon
+iftop
+#iptraf-ng
+#nethogs
+netperf
+tcpdump

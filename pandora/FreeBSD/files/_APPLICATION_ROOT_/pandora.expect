@@ -1,0 +1,9 @@
+#!/usr/bin/env expect
+set _email [exec secrets get $::env(_CONF_PANDORA_KEY)/email-address -stdout 2>/dev/null]
+set _password [exec secrets get $::env(_CONF_PANDORA_KEY)/password -stdout 2>/dev/null]
+spawn pianobar
+expect "* Email:"
+send $_email\r
+expect "* Password:"
+send $_password\r
+interact
