@@ -1,3 +1,28 @@
+_ZFS_RCLONE_PACKAGE=rclone
+_zfs_rclone() {
+	if [ -n "$_ZFS_RCLONE_TARGET" ]; then
+		_pkg_install $_ZFS_RCLONE_PACKAGE
+		zfs set rclone:target=$_ZFS_RCLONE_TARGET $_ZFS_VOLUME
+	fi
+	if [ -n "$_ZFS_RCLONE_PATH" ]; then
+		zfs set rclone:path=$_ZFS_RCLONE_PATH $_ZFS_VOLUME
+	fi
+}
+_ZFS_ZAP_PACKAGE=zap
+_zfs_zap() {
+	if [ -n "$_ZFS_ZAP_SNAP" ]; then
+		_warn "Detected ZFS ZAP, setting up zap"
+		_pkg_install $_ZFS_ZAP_PACKAGE
+		zfs set zap:snap=on $_ZFS_VOLUME
+		zfs allow -u zap bookmark,diff,hold,send,snapshot $_ZFS_VOLUME
+	fi
+	if [ -n "$_ZFS_ZAP_TTL" ]; then
+		zfs set zap:ttl=$_ZFS_ZAP_TTL $_ZFS_VOLUME
+	fi
+	if [ -n "$_ZFS_ZAP_BACKUP" ]; then
+		zfs set zap:backup=$_ZFS_ZAP_BACKUP $_ZFS_VOLUME
+	fi
+}
 _zfs_jail=0
 _zfs_restore() {
 	_info "_zfs_restore: $1"
@@ -32,23 +57,8 @@ _zfs_restore() {
 	if [ -n "$_CONF_SYSTEM_MAINTENANCE_ZFS_USER" ]; then
 		zfs allow -u $_CONF_SYSTEM_MAINTENANCE_ZFS_USER bookmark,diff,hold,send,snapshot $_ZFS_VOLUME
 	fi
-	if [ -n "$_ZFS_ZAP_SNAP" ]; then
-		_warn "Detected ZFS ZAP, setting up zap"
-		zfs set zap:snap=on $_ZFS_VOLUME
-		zfs allow -u zap bookmark,diff,hold,send,snapshot $_ZFS_VOLUME
-	fi
-	if [ -n "$_ZFS_ZAP_TTL" ]; then
-		zfs set zap:ttl=$_ZFS_ZAP_TTL $_ZFS_VOLUME
-	fi
-	if [ -n "$_ZFS_ZAP_BACKUP" ]; then
-		zfs set zap:backup=$_ZFS_ZAP_BACKUP $_ZFS_VOLUME
-	fi
-	if [ -n "$_ZFS_RCLONE_TARGET" ]; then
-		zfs set rclone:target=$_ZFS_RCLONE_TARGET $_ZFS_VOLUME
-	fi
-	if [ -n "$_ZFS_RCLONE_PATH" ]; then
-		zfs set rclone:path=$_ZFS_RCLONE_PATH $_ZFS_VOLUME
-	fi
+	_zfs_zap
+	_zfs_rclone
 	_info "zfs create $_ZFS_VOLUME - done"
 }
 _zfs_has_sufficient_space() {

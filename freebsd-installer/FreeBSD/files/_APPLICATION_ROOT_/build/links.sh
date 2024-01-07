@@ -7,8 +7,6 @@ _link() {
 			_warn "$path does NOT exist"
 			continue
 		elif [ ! -e $parent ]; then
-			#_warn "Parent Directory $parent does NOT exist"
-			#continue
 			mkdir -p $parent
 		fi
 		ln -sf $path $_TARGET

@@ -1,3 +1,7 @@
+_pkg_update() {
+	_pkg_bootstrap
+	_USE_SUDO=1 _PRESERVE_ENV=1 _timeout $_CONF_INSTALL_STEP_TIMEOUT "FreeBSD pkg upgrade" pkg $_PKG_OPTIONS upgrade -yq $@ >/dev/null
+}
 _pkg_install() {
 	_pkg_bootstrap
 	_USE_SUDO=1 _PRESERVE_ENV=1 _timeout $_CONF_INSTALL_STEP_TIMEOUT "FreeBSD pkg install" pkg $_PKG_OPTIONS install -yq $@ >/dev/null
@@ -25,9 +29,9 @@ _pkg_cache_already_mounted() {
 	mount | awk {'print$3'} | grep -q "$_ROOT/var/cache/pkg$"
 }
 _pkg_cache_mount() {
-	$_SUDO_CMD mkdir -p $_ROOT/var/cache/pkg
+	_sudo mkdir -p $_ROOT/var/cache/pkg
 	_info "Mounting host's package cache"
-	$_SUDO_CMD mount -t nullfs /var/cache/pkg $_ROOT/var/cache/pkg || {
+	_sudo mount -t nullfs /var/cache/pkg $_ROOT/var/cache/pkg || {
 		_warn "Error mounting host's package cache"
 		_warn "pkg cache mounts: $(mount | awk {'print$3'} | grep \"^$_ROOT/var/cache/pkg$\")"
 		_warn "mounts: $(mount | awk {'print$3'})"
@@ -151,13 +155,16 @@ _timeout() {
 		timeout_level=warn
 	fi
 	local sudo_prefix
-	[ $_USE_SUDO ] && {
+	if [ -n "$_USE_SUDO" ] && [ -n "$_SUDO_CMD" ]; then
+		if [ -z "$_NON_INTERACTIVE" ]; then
+			$_SUDO_CMD -n ls >/dev/null 2>&1 || _sudo_precmd "$@"
+		fi
 		[ -z "$USER" ] && USER=$(whoami)
 		[ "$USER" != "root" ] && {
 			sudo_prefix=$_SUDO_CMD
 			[ $_PRESERVE_ENV ] && sudo_prefix="$sudo_prefix -E"
 		}
-	}
+	fi
 	$sudo_prefix timeout $_OPTIONS $timeout "$@" || {
 		local error_status=$?
 		local error_message="Other error"
@@ -170,16 +177,17 @@ _timeout() {
 	}
 }
 _packages() {
-	local required_packages="git gnugrep gsed rsync checkrestart"
+	local packages=$_CONF_FREEBSD_INSTALLER_REQUIRED_PACKAGES
 	if [ -z "$_IN_JAIL" ]; then
 		_pkg_setup_ssh_package_cache $_CONF_FREEBSD_INSTALLER_PACKAGE_CACHE
-		required_packages="beadm devcpu-data cpupdate x86info $required_packages"
+		packages="$_CONF_FREEBSD_INSTALLER_REQUIRED_BASE_PACKAGES $packages"
 		_enable_cpu_microcode_patches
 	fi
-	_pkg_install $required_packages || {
-		_error "Error installing $required_packages"
+	_pkg_install $packages || {
+		_error "Error installing $packages"
 		return 1
 	}
+	_info "Installed: $packages"
 	if [ -z "$_IN_JAIL" ]; then
 		_patch_microcode
 	fi

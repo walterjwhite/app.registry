@@ -1,0 +1,6 @@
+: ${_CONF_GIT_COMPRESSION_FORMAT:=xz}
+: ${_CONF_GIT_COMPRESSION_CMD:="xz -z"}
+: ${_CONF_GIT_DELETE_PERIOD:="-v -365d"}
+: ${_CONF_GIT_SQUASH_COMMITS:=2}
+: ${_CONF_GIT_CLONE_TIMEOUT:=30}
+: ${_CONF_GIT_TEMPLATE_PATH:=/Library/Develop/CommandLineTools/usr/share/git-core/templates}
