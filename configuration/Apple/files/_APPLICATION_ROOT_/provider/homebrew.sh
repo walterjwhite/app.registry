@@ -1,0 +1,11 @@
+_PLUGIN_CONFIGURATION_PATH=/opt/homebrew
+_PLUGIN_CONFIGURATION_PATH_IS_DIR=1
+_configure_homebrew_restore() {
+	if [ ! -e $_CONF_INSTALL_APPLICATION_DATA_PATH/$_EXTENSION_NAME/homebrew ]; then
+		return
+	fi
+	brew install $(cat $_CONF_INSTALL_APPLICATION_DATA_PATH/$_EXTENSION_NAME/homebrew)
+}
+_configure_homebrew_backup() {
+	brew bundle dump >$_CONF_INSTALL_APPLICATION_DATA_PATH/$_EXTENSION_NAME/homebrew
+}

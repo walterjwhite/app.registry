@@ -1,10 +1,8 @@
 #!/bin/sh
-#-
 #
 #
 #
 #
-############################################################ INCLUDES
 BSDCFG_SHARE="/usr/share/bsdconfig"
 . $BSDCFG_SHARE/common.subr || exit 1
 f_dprintf "%s: loading includes..." "$0"
@@ -12,10 +10,12 @@ f_include $BSDCFG_SHARE/device.subr
 f_include $BSDCFG_SHARE/dialog.subr
 f_include $BSDCFG_SHARE/password/password.subr
 f_include $BSDCFG_SHARE/variable.subr
-############################################################ CONFIGURATION
 #
 #
 : ${ZFSBOOT_POOL_NAME:=zroot}
+#
+#
+: ${ZFSBOOT_POOL_SIZE=}
 #
 #
 : ${ZFSBOOT_POOL_CREATE_OPTIONS:=-O compress=lz4 -O atime=off}
@@ -73,9 +73,8 @@ f_include $BSDCFG_SHARE/variable.subr
 f_isset ZFSBOOT_DATASETS || ZFSBOOT_DATASETS="
 	/$ZFSBOOT_BEROOT_NAME				mountpoint=none
 	/$ZFSBOOT_BEROOT_NAME/$ZFSBOOT_BOOTFS_NAME	mountpoint=/
-	###/tmp		mountpoint=/tmp,exec=on,setuid=off
+	/home		mountpoint=/home
 	/usr		mountpoint=/usr,canmount=off
-	/usr/home	# NB: /home is a symlink to /usr/home
 	/usr/ports	setuid=off
 	/usr/src
 	/var		mountpoint=/var,canmount=off
@@ -88,7 +87,6 @@ f_isset ZFSBOOT_DATASETS || ZFSBOOT_DATASETS="
 #
 #
 : ${ZFSBOOT_CONFIRM_LAYOUT:=1}
-############################################################ GLOBALS
 #
 #
 FSTAB_FMT="%s\t\t%s\t%s\t%s\t\t%s\t%s\n"
@@ -160,7 +158,7 @@ msg_encrypt_disks_help="Use geli(8) to encrypt all data partitions"
 msg_error="Error"
 msg_force_4k_sectors="Force 4K Sectors?"
 msg_force_4k_sectors_help="Align partitions to 4K sector boundries and set vfs.zfs.min_auto_ashift=12"
-msg_freebsd_installer="FreeBSD Installer"
+msg_freebsd_installer="$OSNAME Installer"
 msg_geli_password="Enter a strong passphrase, used to protect your encryption keys. You will be required to enter this passphrase each time the system is booted"
 msg_geli_setup="Initializing encryption on selected disks,\n this will take several seconds per disk"
 msg_install="Install"
@@ -169,6 +167,7 @@ msg_install_help="Create ZFS boot pool with displayed options"
 msg_invalid_boot_pool_size="Invalid boot pool size \`%s'"
 msg_invalid_disk_argument="Invalid disk argument \`%s'"
 msg_invalid_index_argument="Invalid index argument \`%s'"
+msg_invalid_pool_size="Invalid pool size \`%s'"
 msg_invalid_swap_size="Invalid swap size \`%s'"
 msg_invalid_virtual_device_type="Invalid Virtual Device type \`%s'"
 msg_last_chance_are_you_sure="Last Chance! Are you sure you want to destroy\nthe current contents of the following disks:\n\n   %s"
@@ -219,14 +218,13 @@ msg_swap_mirror="Mirror Swap?"
 msg_swap_mirror_help="Mirror swap partitions for redundancy, breaks crash dumps"
 msg_swap_size="Swap Size"
 msg_swap_size_help="Customize how much swap space is allocated to each selected disk"
-msg_swap_toosmall="The selected swap size (%s) is to small. Please enter a value greater than 100MB or enter 0 for no swap"
+msg_swap_toosmall="The selected swap size (%s) is too small. Please enter a value greater than 100MB or enter 0 for no swap"
 msg_these_disks_are_too_small="These disks are smaller than the amount of requested\nswap (%s) and/or geli(8) (%s) partitions, which would\ntake 100%% or more of each of the following selected disks:\n\n  %s\n\nRecommend changing partition size(s) and/or selecting a\ndifferent set of disks."
 msg_unable_to_get_disk_capacity="Unable to get disk capacity of \`%s'"
 msg_unsupported_partition_scheme="%s is an unsupported partition scheme"
 msg_user_cancelled="User Cancelled."
 msg_yes="YES"
 msg_zfs_configuration="ZFS Configuration"
-############################################################ FUNCTIONS
 #
 #
 dialog_menu_main() {
@@ -395,6 +393,13 @@ dialog_menu_layout() {
 		new_list="$new_list $disk"
 	done
 	disks="${new_list# }"
+	local avail_disks=
+	for disk in $disks; do
+		debug= $disk get name name
+		geom disk list $name | awk '$1 == "Mode:" && $2 != "r0w0e0" { exit 1 }'
+		[ $? -eq 0 ] && avail_disks="$avail_disks $disk"
+	done
+	disks="${avail_disks# }"
 	if [ "$debug" ]; then
 		local disk_names=
 		for disk in $disks; do
@@ -650,7 +655,7 @@ zfs_create_diskpart() {
 				"$align_small" efiboot$index efi 260M \
 				$disk || return $FAILURE
 			if [ -z "$efibootpart" ]; then
-				efibootpart="/dev/$(echo $justaddedpart | cut -f 1 -d ' ')"
+				efibootpart="/dev/gpt/efiboot$index"
 				f_dprintf "$funcname: configuring ESP at [%s]" \
 					"${efibootpart}"
 				f_eval_catch $funcname newfs_msdos "$NEWFS_ESP" \
@@ -724,9 +729,15 @@ zfs_create_diskpart() {
 		fi
 		#
 		#
-		f_eval_catch $funcname gpart "$GPART_ADD_ALIGN_LABEL" \
-			"$align_big" zfs$index freebsd-zfs $disk ||
-			return $FAILURE
+		if [ "$ZFSBOOT_POOL_SIZE" ]; then
+			f_eval_catch $funcname gpart "$GPART_ADD_ALIGN_LABEL_WITH_SIZE" \
+				"$align_big" zfs$index freebsd-zfs $ZFSBOOT_POOL_SIZE $disk ||
+				return $FAILURE
+		else
+			f_eval_catch $funcname gpart "$GPART_ADD_ALIGN_LABEL" \
+				"$align_big" zfs$index freebsd-zfs $disk ||
+				return $FAILURE
+		fi
 		f_eval_catch -d $funcname zpool "$ZPOOL_LABELCLEAR_F" \
 			/dev/$disk$targetpart
 		;;
@@ -781,9 +792,13 @@ zfs_create_diskpart() {
 		fi
 		#
 		#
-		f_eval_catch $funcname gpart "$GPART_ADD_ALIGN_INDEX" \
-			"$align_small" $mbrindex freebsd-zfs ${disk}s1 ||
-			return $FAILURE
+		if [ "$ZFSBOOT_POOL_SIZE" ]; then
+			f_eval_catch $funcname gpart "$GPART_ADD_ALIGN_INDEX_WITH_SIZE" \
+				"$align_small" $mbrindex freebsd-zfs $ZFSBOOT_POOL_SIZE ${disk}s1 || return $FAILURE
+		else
+			f_eval_catch $funcname gpart "$GPART_ADD_ALIGN_INDEX" \
+				"$align_small" $mbrindex freebsd-zfs ${disk}s1 || return $FAILURE
+		fi
 		f_eval_catch -d $funcname zpool "$ZPOOL_LABELCLEAR_F" \
 			/dev/$disk$targetpart # Pedantic
 		f_eval_catch $funcname dd "$DD_WITH_OPTIONS" \
@@ -858,7 +873,7 @@ zfs_create_boot() {
 	#
 	#
 	f_dprintf "$funcname: Expanding supplied size values..."
-	local swapsize bootsize
+	local swapsize bootsize poolsize
 	if ! f_expand_number "$ZFSBOOT_SWAP_SIZE" swapsize; then
 		f_dprintf "$funcname: Invalid swap size \`%s'" \
 			"$ZFSBOOT_SWAP_SIZE"
@@ -871,6 +886,16 @@ zfs_create_boot() {
 		f_show_err "$msg_invalid_boot_pool_size" \
 			"$ZFSBOOT_BOOT_POOL_SIZE"
 		return $FAILURE
+	fi
+	if [ "$ZFSBOOT_POOL_SIZE" ]; then
+		if ! f_expand_number "$ZFSBOOT_POOL_SIZE" poolsize; then
+			f_dprintf "$funcname: Invalid pool size \`%s'" \
+				"$ZFSBOOT_POOL_SIZE"
+			f_show_err "$msg_invalid_pool_size" \
+				"$ZFSBOOT_POOL_SIZE"
+		fi
+		f_dprintf "$funcname: ZFSBOOT_POOL_SIZE=[%s] poolsize=[%s]" \
+			"$ZFSBOOT_POOL_SIZE" "$poolsize"
 	fi
 	f_dprintf "$funcname: ZFSBOOT_SWAP_SIZE=[%s] swapsize=[%s]" \
 		"$ZFSBOOT_SWAP_SIZE" "$swapsize"
@@ -1109,9 +1134,18 @@ zfs_create_boot() {
 	fi
 	#
 	#
-	f_dprintf "$funcname: Set canmount=noauto for the root of the pool..."
-	f_eval_catch $funcname zfs "$ZFS_SET" "canmount=noauto" \
-		"$zroot_name/$ZFSBOOT_BEROOT_NAME/$ZFSBOOT_BOOTFS_NAME"
+	f_dprintf "$funcname: Set canmount=noauto for any datasets under the BE..."
+	echo "$ZFSBOOT_DATASETS" | while read dataset options; do
+		case "$dataset" in "#"* | "") continue ;; esac
+		options="${options%%#*}"
+		#
+		case "$dataset" in "/$ZFSBOOT_BEROOT_NAME/$ZFSBOOT_BOOTFS_NAME"*)
+			f_eval_catch $funcname zfs "$ZFS_SET" "canmount=noauto" \
+				"$zroot_name$dataset" || return $FAILURE
+			;;
+		*) continue ;;
+		esac
+	done
 	f_dprintf "%s: Configuring rc.conf(5)/loader.conf(5) additions..." \
 		"$funcname"
 	f_eval_catch $funcname echo "$ECHO_APPEND" 'zfs_enable=\"YES\"' \
@@ -1209,7 +1243,6 @@ dialog_zpool_name() {
 		$height $width "$value" \
 		2>&1 >&$DIALOG_TERMINAL_PASSTHRU_FD
 }
-############################################################ MAIN
 #
 #
 f_dialog_title "$msg_zfs_configuration"
@@ -1274,7 +1307,11 @@ while :; do
 		if f_expand_number "$ZFSBOOT_SWAP_SIZE" swapsize &&
 			f_expand_number "$ZFSBOOT_BOOT_POOL_SIZE" bootsize &&
 			f_expand_number "1g" zpoolmin; then
-			minsize=$(($swapsize + $zpoolmin)) teeny_disks=
+			minsize=$swapsize teeny_disks=
+			if [ "$ZFSBOOT_POOL_SIZE" ]; then
+				f_expand_number "$ZFSBOOT_POOL_SIZE" poolsize
+				minsize=$(($minsize + $poolsize))
+			fi
 			[ "$ZFSBOOT_BOOT_POOL" ] &&
 				minsize=$(($minsize + $bootsize))
 			for disk in $ZFSBOOT_DISKS; do
@@ -1402,5 +1439,3 @@ while :; do
 	esac
 done
 exit $SUCCESS
-################################################################################
-################################################################################
