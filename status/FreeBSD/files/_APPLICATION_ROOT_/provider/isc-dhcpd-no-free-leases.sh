@@ -15,8 +15,10 @@ _isc_dhcpd_no_free_leases() {
 			message="$instance"
 		fi
 	done
-	[ "$message" ] && _STATUS_MESSAGE="$_STATUS_MESSAGE\n\nISC DHCPd - no free leases\n$message"
-	return 1
+	[ "$message" ] && {
+		_STATUS_MESSAGE="$_STATUS_MESSAGE\n\nISC DHCPd - no free leases\n$message"
+		return 1
+	}
 }
 _isc_dhcpd_has_no_free_leases() {
 	zstdgrep 'no free leases' $_ISC_DHCPD_LOG_FILE >/dev/null 2>&1

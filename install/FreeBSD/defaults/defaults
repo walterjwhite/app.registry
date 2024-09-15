@@ -13,3 +13,5 @@ _PYPI_PACKAGE="python39 py39-pip"
 _GO_PACKAGE="go"
 GOPATH=/usr/local
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
+: ${_CONF_INSTALL_SUDO_BEEP_TONE:=L32aL8fL32c}
+_CONF_INSTALL_STAT_ARGUMENTS='-f %OLp'

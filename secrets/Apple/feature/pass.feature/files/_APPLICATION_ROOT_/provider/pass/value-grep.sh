@@ -1,0 +1,1 @@
+pass grep "$1"
