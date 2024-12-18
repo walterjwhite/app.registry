@@ -1,0 +1,2 @@
+[ "$_CONF_SECRETS_FORCE_DELETE" ] && _PASS_OPTIONS="$_PASS_OPTIONS -f"
+pass rm $_PASS_OPTIONS $_SECRET_KEY && pass git push

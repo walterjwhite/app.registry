@@ -1,0 +1,1 @@
+_EXEC_CMD="shellcheck $_OPTN_SHELLCHECK_ARGUMENTS {} +"
