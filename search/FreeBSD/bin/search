@@ -1,6 +1,8 @@
 #!/bin/sh
 set -a
 _APPLICATION_NAME='search'
+_CONF_INSTALL_CRONTAB_ROOT_PATH=/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin\n\n
+_CONF_INSTALL_CRONTAB_USER_PATH=PATH=/usr/local/bin:/usr/bin:/bin:/opt/bin\n\n
 _PLATFORM="FreeBSD"
 _TAR_ARGS=" -f - "
 _SUDO_CMD="sudo"
@@ -16,9 +18,9 @@ _PYPI_PACKAGE="python39 py39-pip"
 _GO_PACKAGE="go"
 GOPATH=/usr/local
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
-if [ "$HOME" = "/" ]; then
-	HOME=/root
-fi
+: ${_CONF_INSTALL_SUDO_BEEP_TONE:=L32aL8fL32c}
+: ${_CONF_INSTALL_CONTEXT:=$_CONSOLE_CONTEXT_ID}
+: ${_CONF_INSTALL_CONTEXT:=default}
 : ${_CONF_INSTALL_C_ALRT:="1;31m"}
 : ${_CONF_INSTALL_C_ERR:="1;31m"}
 : ${_CONF_INSTALL_C_SCS:="1;32m"}
@@ -27,12 +29,8 @@ fi
 : ${_CONF_INSTALL_C_DETAIL:="1;0;36m"}
 : ${_CONF_INSTALL_C_DEBUG:="1;35m"}
 : ${_CONF_INSTALL_C_STDIN:="1;34m"}
-: ${_CONF_INSTALL_AUDIT:=0}
-: ${_CONF_INSTALL_LOG_LEVEL:=2}
 : ${_CONF_INSTALL_DATE_FORMAT:="%Y/%m/%d|%H:%M:%S"}
 : ${_CONF_INSTALL_DATE_TIME_FORMAT:="%Y/%m/%d %H:%M:%S"}
-: ${_CONF_INSTALL_WAIT_INTERVAL:=30}
-: ${_CONF_INSTALL_NO_PAGER:=0}
 : ${_CONF_INSTALL_BEEP_TIMEOUT:=5}
 : ${_CONF_INSTALL_BEEP_ERR:='L32c'}
 : ${_CONF_INSTALL_BEEP_ALRT:='L32f'}
@@ -42,24 +40,11 @@ fi
 : ${_CONF_INSTALL_BEEP_DETAIL:=''}
 : ${_CONF_INSTALL_BEEP_DEBUG:=''}
 : ${_CONF_INSTALL_BEEP_STDIN:='L32ab'}
-: ${_CONF_INSTALL_SYSTEM_TEMPLATE_PATH:=/usr/share/git/templates}
-: ${_CONF_INSTALL_LIBRARY_PATH:=/usr/local/walterjwhite}
-: ${_CONF_INSTALL_BIN_PATH:=/usr/local/bin}
-: ${_CONF_INSTALL_CONTEXT:=$_CONSOLE_CONTEXT_ID}
-: ${_CONF_INSTALL_CONTEXT:=default}
-: ${_CONF_INSTALL_DATA_PATH:=$HOME/.data}
-: ${_CONF_INSTALL_CACHE_PATH:=$_CONF_INSTALL_DATA_PATH/.cache}
-: ${_CONF_INSTALL_CONFIG_PATH:=$HOME/.config/walterjwhite}
-: ${_CONF_INSTALL_STEP_TIMEOUT:=300}
-: ${_CONF_INSTALL_CONF_VALIDATION_FUNCTION:=_warn}
+: ${_CONF_INSTALL_AUDIT:=0}
+: ${_CONF_INSTALL_LOG_LEVEL:=2}
 : ${_CONF_INSTALL_INDENT:="  "}
-: ${_CONF_INSTALL_FEATURE_TIMEOUT_ERROR_LEVEL:=warn}
-case $(ps -o stat= -p $$) in
-*+*) ;;
-*)
-	_BACKGROUNDED=1
-	;;
-esac
+: ${_CONF_INSTALL_CONF_VALIDATION_FUNCTION:=_warn}
+: ${_CONF_INSTALL_WAITER_LEVEL:=_debug}
 if [ -z "$_NON_INTERACTIVE" ]; then
 	tty >/dev/null || _NON_INTERACTIVE=0
 fi
@@ -74,15 +59,17 @@ else
 	_LOG_TARGET=8
 	_NLOG_TARGET=2
 fi
-: ${_CONF_INSTALL_WAITER_LEVEL:=_debug}
-: ${_CONF_INSTALL_IOSTAT_DURATION:=5}
-which pgrep >/dev/null 2>&1 && _PARENT_PROCESSES_FUNCTION=_parent_processes_pgrep
-_DETECTED_PLATFORM=$(uname)
-case $_DETECTED_PLATFORM in
-Darwin)
-	_DETECTED_PLATFORM=Apple
+: ${_CONF_INSTALL_FEATURE_TIMEOUT_ERROR_LEVEL:=warn}
+: ${_CONF_INSTALL_WAIT_INTERVAL:=30}
+: ${_CONF_INSTALL_NO_PAGER:=0}
+: ${_CONF_INSTALL_STEP_TIMEOUT:=300}
+case $(ps -o stat= -p $$) in
+*+*) ;;
+*)
+	_BACKGROUNDED=1
 	;;
 esac
+: ${_CONF_INSTALL_IOSTAT_DURATION:=5}
 : ${_CONF_INSTALL_REPOSITORY_URL:=https://github.com/walterjwhite}
 : ${_CONF_INSTALL_MIRROR_URLS:=https://github.com/walterjwhite}
 : ${_CONF_INSTALL_SUDO_TIMEOUT:=270}
@@ -90,18 +77,40 @@ esac
 : ${_CONF_INSTALL_NETWORK_TEST_TIMEOUT:=5}
 : ${_CONF_INSTALL_TEAMS_MESSAGE_PARALLELIZATION:=5}
 : ${_CONF_INSTALL_PARALLEL_BUILD:=8}
-: ${_CONF_INSTALL_APP_REGISTRY_GIT_URL:=github.com/walterjwhite/app.registry.git}
+: ${_CONF_INSTALL_APP_REGISTRY_GIT_URL:=https://github.com/walterjwhite/app.registry.git}
+: ${_CONF_INSTALL_AUTO_UPDATE_PACKAGES:=1}
+: ${_CONF_INSTALL_CLEAN_APP_REGISTRY_WORKSPACE=1}
+: ${_CONF_INSTALL_RANDOM_DEFAULT_LENGTH=8}
+if [ "$HOME" = "/" ]; then
+	HOME=/root
+fi
+: ${_CONF_INSTALL_SYSTEM_TEMPLATE_PATH:=/usr/share/git/templates}
+: ${_CONF_INSTALL_LIBRARY_PATH:=/usr/local/walterjwhite}
+: ${_CONF_INSTALL_BIN_PATH:=/usr/local/bin}
+: ${_CONF_INSTALL_DATA_PATH:=$HOME/.data}
+: ${_CONF_INSTALL_CACHE_PATH:=$_CONF_INSTALL_DATA_PATH/.cache}
+: ${_CONF_INSTALL_CONFIG_PATH:=$HOME/.config/walterjwhite}
 : ${_CONF_INSTALL_RUN_PATH:=/tmp/$USER/walterjwhite/app}
 _CONF_INSTALL_DATA_ARTIFACTS_PATH=$_CONF_INSTALL_DATA_PATH/install/artifacts
 _CONF_INSTALL_DATA_REGISTRY_PATH=$_CONF_INSTALL_DATA_PATH/install/registry
 _CONF_INSTALL_APPLICATION_DATA_PATH=$_CONF_INSTALL_DATA_PATH/$_APPLICATION_NAME
 _CONF_INSTALL_APPLICATION_CONFIG_PATH=$_CONF_INSTALL_CONFIG_PATH/$_APPLICATION_NAME
 _CONF_INSTALL_APPLICATION_LIBRARY_PATH=$_CONF_INSTALL_LIBRARY_PATH/$_APPLICATION_NAME
+which pgrep >/dev/null 2>&1 && _PARENT_PROCESSES_FUNCTION=_parent_processes_pgrep
+_DETECTED_PLATFORM=$(uname)
+case $_DETECTED_PLATFORM in
+Darwin)
+	_DETECTED_PLATFORM=Apple
+	;;
+esac
+: ${_CONF_SEARCH_LOCATE_UPDATEDB_CMD:=/usr/libexec/locate.updatdb}
+: ${_CONF_SEARCH_LOCATE_DATABASE:=/var/db/locate.database}
 : ${_CONF_SEARCH_CONTENTS_RECURSE_SUBMODULES:=1}
 : ${_CONF_SEARCH_CONTENTS_TYPE:=string}
 : ${_CONF_SEARCH_CWD_ONLY:=0}
 : ${_CONF_SEARCH_RECURSIVE_PAGER:=1}
 : ${_CONF_SEARCH_SCOPE_MAX_DEPTH:=3}
+: ${_SEARCH_TYPE:=git/contents}#!/bin/sh
 _beep() {
 	if [ -n "$_BEEPING" ]; then
 		_debug "Another 'beep' is in progress"
@@ -118,6 +127,13 @@ _do_beep() {
 }
 _beep_done() {
 	unset _BEEPING
+}
+_sudo_precmd() {
+	_beep $_CONF_INSTALL_SUDO_BEEP_TONE
+}
+_interactive_alert() {
+	which notify-send >/dev/null 2>&1 || return 1
+	[ $XAUTHORITY ] && notify-send -e "$*"
 }
 _mktemp() {
 	mktemp -t ${_APPLICATION_NAME}.${_APPLICATION_CMD}.$1
@@ -140,9 +156,7 @@ _get_defaults() {
 		-exec $_CONF_INSTALL_GNU_GREP -Poh "_CONF_${app_name}_[\w_\d]{3,}" {} + 2>/dev/null | sort -u
 }
 _variable_is_set() {
-	if [ $(env | grep "^$1=.*$" | wc -l) -gt 0 ]; then
-		return 0
-	fi
+	[ $(env | grep "^$1=.*$" | wc -l) -gt 0 ] && return 0
 	return 1
 }
 _has_required_conf() {
@@ -187,7 +201,6 @@ _disable_feature() {
 	if [ -z "$_FEATURE_DISABLED" ]; then
 		_warn "Error installing feature: $_FEATURE ($1)"
 	fi
-
 	printf '%s\n' $(_feature_key $1)_DISABLED=1 | _metadata_write
 }
 _is_feature_enabled() {
@@ -230,7 +243,14 @@ _read_if() {
 	fi
 	[ $_NON_INTERACTIVE ] && _error "Running in non-interactive mode and user input was requested: $@" 10
 	_print_log 9 STDI "$_CONF_INSTALL_C_STDIN" "$_CONF_INSTALL_BEEP_STDIN" "$1 $3"
+	_interactive_alert_if $1 $3
 	read -r $2
+}
+_interactive_alert_if() {
+	_is_interactive_alert_enabled && _interactive_alert "$@"
+}
+_is_interactive_alert_enabled() {
+	grep -cq '^_OPTN_INSTALL_INTERACTIVE_ALERT=1$' $_CONF_INSTALL_APPLICATION_CONFIG_PATH 2>/dev/null
 }
 _read_ifs() {
 	stty -echo
@@ -239,12 +259,14 @@ _read_ifs() {
 }
 _continue_if() {
 	_read_if "$1" _PROCEED "$2"
-	if [ -z "$_PROCEED" ]; then
+	local proceed="$_PROCEED"
+	unset _PROCEED
+	if [ -z "$proceed" ]; then
 		_DEFAULT=$(printf '%s' $2 | awk -F'/' {'print$1'})
-		_PROCEED=$_DEFAULT
+		proceed=$_DEFAULT
 	fi
-	_PROCEED=$(printf '%s' "$_PROCEED" | tr '[:lower:]' '[:upper:]')
-	if [ $_PROCEED = "N" ]; then
+	local proceed=$(printf '%s' "$proceed" | tr '[:lower:]' '[:upper:]')
+	if [ $proceed = "N" ]; then
 		return 1
 	fi
 	return 0
@@ -276,11 +298,11 @@ _() {
 	fi
 }
 _optional_include() {
-	if [ -e $1 ]; then
-		. $1
-	else
+	if [ ! -e $1 ]; then
 		_debug "_optional_include: $1 does NOT exist"
+		return 1
 	fi
+	. $1
 }
 _configure() {
 	_optional_include $1
@@ -321,11 +343,7 @@ _contains_argument() {
 	return 1
 }
 _write() {
-	if [ -z "$1" ]; then
-		_error "filename cannot be empty."
-	fi
-	$_SUDO_CMD mkdir -p $(dirname "$1")
-	$_SUDO_CMD tee -a "$1" >/dev/null
+	_sudo tee -a "$1" >/dev/null
 }
 _print_help() {
 	if [ -e $2 ]; then
@@ -385,7 +403,7 @@ _detail() {
 	_print_log 2 DTL "$_CONF_INSTALL_C_DETAIL" "$_CONF_INSTALL_BEEP_DETAIL" "$1"
 }
 _debug() {
-	_print_log 1 DBG "$_CONF_INSTALL_C_DEBUG" "$_CONF_INSTALL_BEEP_DEBUG" "$1"
+	_print_log 1 DBG "$_CONF_INSTALL_C_DEBUG" "$_CONF_INSTALL_BEEP_DEBUG" "($$) $1"
 }
 _do_log() {
 	:
@@ -415,7 +433,7 @@ _print_log() {
 	if [ $_level -lt $_CONF_INSTALL_LOG_LEVEL ]; then
 		return
 	fi
-	[ -n "$_LOGGING_CONTEXT" ] && _message="$_LOGGING_CONTEXT - ${_LOG_INDENT}$_message"
+	[ -n "$_LOGGING_CONTEXT" ] && _message="$_LOGGING_CONTEXT - $_message"
 	local _message_date_time=$(date +"$_CONF_INSTALL_DATE_FORMAT")
 	if [ $_BACKGROUNDED ] && [ $_OPTN_INSTALL_BACKGROUND_NOTIFICATION_METHOD ]; then
 		$_OPTN_INSTALL_BACKGROUND_NOTIFICATION_METHOD "$_slevel" "$_message" &
@@ -453,9 +471,7 @@ _increase_indent() {
 }
 _decrease_indent() {
 	_LOG_INDENT=$(printf '%s' "$_LOG_INDENT" | sed -e "s/${_CONF_INSTALL_INDENT}$//")
-	if [ ${#_LOG_INDENT} -eq 0 ]; then
-		unset _LOG_INDENT
-	fi
+	[ ${#_LOG_INDENT} -eq 0 ] && _reset_indent
 }
 _reset_indent() {
 	unset _LOG_INDENT
@@ -473,9 +489,7 @@ _log_non_interactive() {
 _log_interactive() {
 	[ $_NO_WRITE_STDERR ] && return
 	_is_open $_LOG_TARGET || return
-	if [ $_NON_INTERACTIVE ] && [ -z $_LOGFILE ]; then
-		return
-	fi
+	[ $_NON_INTERACTIVE ] && [ -z $_LOGFILE ] && return
 	if [ $_CONF_INSTALL_AUDIT -gt 0 ]; then
 		printf >&$_LOG_TARGET '\033[%s%s \033[0m%s %s\n' "$1" "$2" "$3" "$4"
 	else
@@ -497,9 +511,6 @@ _log_app_init() {
 _log_app() {
 	_$_log_level "$_APPLICATION_NAME:$_APPLICATION_CMD:$_APPLICATION_VERSION $_APPLICATION_BUILD_DATE / $_APPLICATION_INSTALL_DATE - $1 ($$)"
 }
-_syslog() {
-	:
-}
 _mail() {
 	if [ $# -lt 3 ]; then
 		_warn "recipients[0], subject[1], message[2] is required - $# arguments provided"
@@ -512,6 +523,93 @@ _mail() {
 	local message="$1"
 	shift
 	printf "$message" | mail -s "$subject" $recipients
+}
+_time_seconds_to_human_readable() {
+	_HUMAN_READABLE_TIME=$(printf '%02d:%02d:%02d' $(($1 / 3600)) $(($1 % 3600 / 60)) $(($1 % 60)))
+}
+_time_human_readable_to_seconds() {
+	case $1 in
+	*w)
+		_TIME_IN_SECONDS=${1%%w}
+		_TIME_IN_SECONDS=$(($_TIME_IN_SECONDS * 3600 * 8 * 5))
+		;;
+	*d)
+		_TIME_IN_SECONDS=${1%%d}
+		_TIME_IN_SECONDS=$(($_TIME_IN_SECONDS * 3600 * 8))
+		;;
+	*h)
+		_TIME_IN_SECONDS=${1%%h}
+		_TIME_IN_SECONDS=$(($_TIME_IN_SECONDS * 3600))
+		;;
+	*m)
+		_TIME_IN_SECONDS=${1%%m}
+		_TIME_IN_SECONDS=$(($_TIME_IN_SECONDS * 60))
+		;;
+	*s)
+		_TIME_IN_SECONDS=${1%%s}
+		;;
+	*)
+		_error "$1 was not understood"
+		;;
+	esac
+}
+_time_decade() {
+	local year=$(date +%Y)
+	local _end_year=$(printf '%s' $year | head -c 4 | tail -c 1)
+	local _event_decade_prefix=$(printf '%s' "$year" | $_CONF_INSTALL_GNU_GREP -Po "[0-9]{3}")
+	if [ "$_end_year" -eq "0" ]; then
+		_event_decade_start=${_event_decade_prefix}
+		_event_decade_start=$(printf '%s' "$_event_decade_start-1" | bc)
+		_event_decade_end=${_event_decade_prefix}0
+	else
+		_event_decade_start=$_event_decade_prefix
+		_event_decade_end=$_event_decade_prefix
+		_event_decade_end=$(printf '%s' "$_event_decade_end+1" | bc)
+		_event_decade_end="${_event_decade_end}0"
+	fi
+	_event_decade_start=${_event_decade_start}1
+	printf '%s-%s' "$_event_decade_start" "$_event_decade_end"
+}
+_current_time() {
+	date +$_CONF_INSTALL_DATE_TIME_FORMAT
+}
+_current_time_unix_epoch() {
+	date +%s
+}
+_timeout() {
+	local timeout=$1
+	shift
+	local message=$1
+	shift
+	local timeout_units='s'
+	if [ $(printf '%s' "$timeout" | grep -c '[smhd]{1}') -gt 0 ]; then
+		unset timeout_units
+	fi
+	local timeout_level=error
+	if [ $_WARN ]; then
+		timeout_level=warn
+	fi
+	local sudo_prefix
+	if [ -n "$_USE_SUDO" ] && [ -n "$_SUDO_CMD" ]; then
+		if [ -z "$_NON_INTERACTIVE" ]; then
+			$_SUDO_CMD -n ls >/dev/null 2>&1 || _sudo_precmd "$@"
+		fi
+		[ -z "$USER" ] && USER=$(whoami)
+		[ "$USER" != "root" ] && {
+			sudo_prefix=$_SUDO_CMD
+			[ $_PRESERVE_ENV ] && sudo_prefix="$sudo_prefix -E"
+		}
+	fi
+	$sudo_prefix timeout $_OPTIONS $timeout "$@" || {
+		local error_status=$?
+		local error_message="Other error"
+		if [ $error_status -eq 124 ]; then
+			error_message="Timed Out"
+		fi
+		[ $_TIMEOUT_ERR_FUNCTION ] && $_TIMEOUT_ERR_FUNCTION
+		_$timeout_level "_timeout: $error_message: ${timeout}${timeout_units} - $message ($error_status): $sudo_prefix timeout $_OPTIONS $timeout $* ($USER)"
+		return $error_status
+	}
 }
 _on_exit() {
 	[ $_EXIT ] && return 1
@@ -533,14 +631,13 @@ _on_exit() {
 	_on_exit_beep
 }
 _defer() {
+	_debug "deferring: $1"
 	_DEFERS="${_DEFERS:+$_DEFERS }$1"
 }
 _on_exit_beep() {
 	local current_time=$(date +%s)
 	local timeout=$(($current_time + $_CONF_INSTALL_BEEP_TIMEOUT))
-	if [ $current_time -le $timeout ]; then
-		return 1
-	fi
+	[ $current_time -le $timeout ] && return 1
 	local beep_code
 	if [ $_EXIT_STATUS -gt 0 ]; then
 		beep_code="$_CONF_INSTALL_BEEP_ERR"
@@ -563,17 +660,21 @@ _init_application_context() {
 	_APPLICATION_PIPE_DIR=$(dirname $_APPLICATION_PIPE)
 	mkdir -p $_APPLICATION_PIPE_DIR
 	mkfifo $_APPLICATION_PIPE
-	if [ "$_APPLICATION_NAME" != "install" ]; then
-		_configure $_CONF_INSTALL_CONFIG_PATH/install
-	fi
-	_configure $_CONF_INSTALL_APPLICATION_CONFIG_PATH
-	if [ -n "$_CONFIGURATIONS" ]; then
-		local configure
-		for configure in $_CONFIGURATIONS; do
-			_configure $_CONF_INSTALL_CONFIG_PATH/$configure
-		done
-	fi
+	_init_configuration
 	$_CONF_INSTALL_WAITER_LEVEL "($_APPLICATION_CMD) Please use -w=$$"
+}
+_init_configuration() {
+	if [ -z "$_CONFIGURATIONS" ]; then
+		if [ "$_APPLICATION_NAME" != "install" ]; then
+			_configure $_CONF_INSTALL_CONFIG_PATH/install
+		fi
+		_configure $_CONF_INSTALL_APPLICATION_CONFIG_PATH
+		return 1
+	fi
+	local configure
+	for configure in $(printf '%s\n' $_CONFIGURATIONS); do
+		_configure $_CONF_INSTALL_CONFIG_PATH/$configure
+	done
 }
 _has_other_instances() {
 	if [ $(find $_APPLICATION_CMD_DIR -type p -maxdepth 1 ! -name $$ | wc -l) -gt 0 ]; then
@@ -607,7 +708,7 @@ _waiter() {
 			if [ ! -e $_UPSTREAM_APPLICATION_PIPE ]; then
 				_error "Upstream pipe no longer exists"
 			fi
-			_UPSTREAM_APPLICATION_STATUS=$(timeout $_CONF_INSTALL_WAIT_INTERVAL cat $_UPSTREAM_APPLICATION_PIPE 2>/dev/null)
+			_UPSTREAM_APPLICATION_STATUS=$(_timeout $_CONF_INSTALL_WAIT_INTERVAL "_waiter:upstream" cat $_UPSTREAM_APPLICATION_PIPE 2>/dev/null)
 			local _UPSTREAM_STATUS=$?
 			if [ $_UPSTREAM_STATUS -eq 0 ]; then
 				if [ -z "$_UPSTREAM_APPLICATION_STATUS" ] || [ $_UPSTREAM_APPLICATION_STATUS -gt 0 ]; then
@@ -664,47 +765,137 @@ _init_pager() {
 		PAGER=cat
 	fi
 }
-. $_CONF_INSTALL_LIBRARY_PATH/$_APPLICATION_NAME
-_search_all() {
-	if [ -z "$_PROJECT_BASE_PATH" ] && [ -z "$_CONF_INSTALL_DATA_PATH" ]; then
-		_CONF_SEARCH_PATH="."
-	else
-		_CONF_SEARCH_PATH="$_PROJECT_BASE_PATH $_CONF_INSTALL_DATA_PATH"
+_random() {
+	local length=$_CONF_INSTALL_RANDOM_DEFAULT_LENGTH
+	[ -n "$1" ] && {
+		length=$1
+		shift
+	}
+	openssl rand -base64 $length
+}
+_sudo() {
+	if [ "$1" = "$_SUDO_CMD" ]; then
+		shift
 	fi
-	_SEARCH_PATH="$_CONF_SEARCH_PATH" _search_recursive "$@"
-}
-_search_base() {
-	if [ "$_CONF_SEARCH_CWD_ONLY" -eq 0 ]; then
-		unset _GIT_NO_INIT_PROJECT_DIRECTORY
+	if [ $# -eq 0 ]; then
+		return
 	fi
-	local searched
-	[ $_SEARCH_BRANCHES ] && _SEARCH_TYPE=branches _do_search_base "$@" && searched=1
-	[ $_SEARCH_TAGS ] && _SEARCH_TYPE=tags _do_search_base "$@" && searched=1
-	[ $_SEARCH_FILENAMES ] && _SEARCH_TYPE=filenames _do_search_base "$@" && searched=1
-	[ $_SEARCH_CHANGES ] && _SEARCH_TYPE=changes _do_search_base "$@" && searched=1
-	[ $_SEARCH_LOGS ] && _SEARCH_TYPE=logs _do_search_base "$@" && searched=1
-	[ $_SEARCH_CONTENTS ] || [ -z $searched ] && _SEARCH_TYPE=contents _do_search_base "$@"
+	if [ -z "$_SUDO_CMD" ]; then
+		$@
+		return
+	fi
+	if [ -z "$_NON_INTERACTIVE" ]; then
+		$_SUDO_CMD -n ls >/dev/null 2>&1 || _sudo_precmd "$@"
+	fi
+	$_SUDO_CMD $_SUDO_OPTIONS "$@"
 }
-_do_search_base() {
-	[ $_SEARCH_RECURSIVE ] || _detail "Searching $_SEARCH_TYPE @ $_PROJECT: $*"
-	_search_${_SEARCH_TYPE} "$@"
+_defer_cleanup_temp() {
+	[ -z "$_TMP_CLEANUP_DEFERS" ] && _defer _cleanup_temp
+	_TMP_CLEANUP_DEFERS="${_TMP_CLEANUP_DEFERS:+$_TMP_CLEANUP_DEFERS }$1"
 }
-_search_recursive() {
+_cleanup_temp() {
+	if [ -n "$_TMP_CLEANUP_DEFERS" ]; then
+		rm -rf $_TMP_CLEANUP_DEFERS
+		unset _TMP_CLEANUP_DEFERS
+	fi
+}
+_configure $_CONF_INSTALL_LIBRARY_PATH/$_APPLICATION_NAME/.metadata
+_get_search_filenames_scope() {
+	_SEARCH_SCOPE=.
+}
+_search_filenames_wd() {
+	_SEARCH_FILENAMES_PATH=.
+	_search_filenames_do "$@"
+}
+_search_filenames_all() {
+	_SEARCH_FILENAMES_PATH="$_PROJECT_BASE_PATH $_CONF_INSTALL_DATA_PATH"
+	_search_filenames_do "$@"
+}
+_search_filenames_system() {
+	if [ ! -e $_CONF_SEARCH_LOCATE_DATABASE ]; then
+		_warn "Initializing locate database"
+		$_CONF_SEARCH_LOCATE_UPDATEDB_CMD
+	fi
+	locate "$@"
+}
+_search_filenames_do() {
+	[ "$_SEARCH_EDIT" ] && _POST_ARGS="-exec $_CONF_SEARCH_EDITOR {} +"
+	[ "$_SEARCH_XEDIT" ] && _POST_ARGS="-exec $_CONF_SEARCH_XEDITOR {} +"
+	[ "$_SEARCH_FILES" ] && _POST_ARGS="-execdir $_CONF_SEARCH_FILE_MANAGER {} ;"
+	set -o noglob
+	for _ARG in "$@"; do
+		case $_ARG in
+		-i)
+			_CASE_INSENSITIVE_SEARCH=i
+			;;
+		-l) ;;
+		*)
+			_FIND_ARGS="-${_CASE_INSENSITIVE_SEARCH}path $_ARG"
+			;;
+		esac
+	done
+	find $_SEARCH_FILENAMES_PATH \
+		\( -type f -or -type l \) -and ! -path '*/.git/*' \
+		$_FIND_ARGS $_POST_ARGS
+}
+_in_path() {
+	_require "$1" _in_path
+	local test_path=$(readlink -f $1)
+	readlink -f $PWD | grep -c "^$test_path" >/dev/null 2>&1
+}
+_in_application_data_path() {
+	_in_path $_CONF_INSTALL_APPLICATION_DATA_PATH
+}
+_in_data_path() {
+	_in_path $_CONF_INSTALL_DATA_PATH
+}
+_remove_empty_directories() {
+	find $1 -type d -empty -exec rm -rf {} +
+}
+_get_search_git_scope() {
+	_GIT_WARN=1 _get_project_directory && {
+		_SEARCH_SCOPE=.
+		return
+	}
+	_in_path "$_PROJECT_BASE_PATH" && {
+		_SEARCH_SCOPE=recursive
+		return
+	}
+	_in_path "$_CONF_INSTALL_DATA_PATH" && {
+		_SEARCH_SCOPE=recursive
+		return
+	}
+	_SEARCH_SCOPE=all
+}
+_search_git_wd() {
+	[ $_CONF_SEARCH_CWD_ONLY -eq 0 ] && unset _GIT_NO_INIT_PROJECT_DIRECTORY
+	[ $_SEARCH_RECURSIVE ] || _detail "Searching $_SEARCH_FUNCTION @ $_PROJECT: $*"
+	_search_${_SEARCH_FUNCTION} "$@"
+}
+_search_git_recursive() {
 	_CONF_INSTALL_NO_PAGER=$_CONF_SEARCH_RECURSIVE_PAGER
-	_SEARCH_SCOPE=base
 	_SEARCH_RECURSIVE=1
-	find . \( -type d -or -type f \) -name '.git' -execdir search "$@" \;
+	[ -z "$_SEARCH_PATH" ] && _SEARCH_PATH=.
+	_SEARCH_SCOPE=. find $_SEARCH_PATH \( -type d -or -type f \) -name '.git' -execdir search "$@" \;
 }
-_search_activity() {
+_search_git_all() {
+	if [ -z "$_PROJECT_BASE_PATH" ] && [ -z "$_CONF_INSTALL_DATA_PATH" ]; then
+		_SEARCH_PATH="."
+	else
+		_SEARCH_PATH="$_PROJECT_BASE_PATH $_CONF_INSTALL_DATA_PATH"
+	fi
+	_search_git_recursive "$@"
+}
+_search_git_activity() {
 	if [ ! -e $_PROJECT_PATH/.activity ]; then
 		_warn "No activity in $_PROJECT_PATH/.activity"
 		return
 	fi
 }
-_search_branches() {
-	gb -a | grep $_OPTIONS "$_CONTENTS_SEARCH"
+_search_git_branches() {
+	git branch -a | grep --color $_OPTIONS "$1"
 }
-_search_changes() {
+_search_git_changes() {
 	if [ $# -eq 0 ]; then
 		_warn "Not searching changes as no search argument was provided."
 		return
@@ -724,49 +915,21 @@ _search_changes() {
 		esac
 	done
 	if [ "$_SEARCH_ALL_BRANCHES" ]; then
-		_search_changes_all
+		_search_git_changes_all
 		return
 	fi
-	_search_changes_do
+	_search_git_changes_do
 }
-_search_changes_do() {
+_search_git_changes_do() {
 	git log $_SEARCH_BRANCH -p $_OPTIONS -G "$_CHANGE_SEARCH"
 }
-_search_changes_all() {
-	for _SEARCH_BRANCH in $(gb); do
+_search_git_changes_all() {
+	for _SEARCH_BRANCH in $(git branch); do
 		_detail "Searching changes in $_SEARCH_BRANCH"
-		_search_changes_do
+		_search_git_changes_do
 	done
 }
-_git_contents_search() {
-	_OPTIONS="${_OPTIONS:+$_OPTIONS }-n"
-	_git_contents_search_$_SEARCH_COMMITS
-}
-_git_contents_search_current() {
-	git grep $_OPTIONS "$_CONTENTS_SEARCH" $_SEARCH_BRANCH
-}
-_git_contents_search_any() {
-	git rev-list --all | xargs _git_contents_search_current
-}
-_git_contents_search_all() {
-	for _SEARCH_BRANCH in $(gb); do
-		_detail " searching contents in $_SEARCH_BRANCH"
-		_git_contents_search_current
-	done
-}
-_git_contents_edit() {
-	_OPTIONS="${_OPTIONS:+$_OPTIONS }-l"
-	$_CONF_SEARCH_EDITOR $(_git_contents_search_current)
-}
-_git_contents_xedit() {
-	_OPTIONS="${_OPTIONS:+$_OPTIONS }-l"
-	$_CONF_SEARCH_XEDITOR $(_git_contents_search_current)
-}
-_git_contents_files() {
-	_OPTIONS="${_OPTIONS:+$_OPTIONS }-l"
-	$_CONF_SEARCH_FILE_MANAGER $(dirname $(_git_contents_search_current) | sort -u)
-}
-_search_contents() {
+_search_git_contents() {
 	if [ $# -eq 0 ]; then
 		_warn "Not searching contents as no search argument was provided."
 		return
@@ -779,7 +942,7 @@ _search_contents() {
 		--after=*)
 			shift
 			;;
-		-i | -v)
+		-i | -v | -l)
 			_OPTIONS="${_OPTIONS:+$_OPTIONS }$_ARG"
 			shift
 			;;
@@ -800,7 +963,7 @@ _search_contents() {
 		esac
 	done
 	: ${_SEARCH_COMMITS:=current}
-	_search_contents_get_type
+	_search_git_contents_get_type
 	if [ $_CONF_SEARCH_CONTENTS_RECURSE_SUBMODULES -eq 1 ]; then
 		_OPTIONS="${_OPTIONS:+$_OPTIONS }--recurse-submodules"
 	fi
@@ -814,7 +977,35 @@ _search_contents() {
 		_git_contents_search
 	fi
 }
-_search_contents_get_type() {
+_git_contents_search() {
+	_OPTIONS="${_OPTIONS:+$_OPTIONS }-n"
+	_git_contents_search_$_SEARCH_COMMITS
+}
+_git_contents_search_current() {
+	git grep $_OPTIONS "$_CONTENTS_SEARCH" $_SEARCH_BRANCH
+}
+_git_contents_search_any() {
+	git rev-list --all | xargs _git_contents_search_current
+}
+_git_contents_search_all() {
+	for _SEARCH_BRANCH in $(git branch); do
+		_detail " searching contents in $_SEARCH_BRANCH"
+		_git_contents_search_current
+	done
+}
+_git_contents_edit() {
+	_OPTIONS="${_OPTIONS:+$_OPTIONS }-l"
+	$_CONF_SEARCH_EDITOR $(_git_contents_search_current)
+}
+_git_contents_xedit() {
+	_OPTIONS="${_OPTIONS:+$_OPTIONS }-l"
+	$_CONF_SEARCH_XEDITOR $(_git_contents_search_current)
+}
+_git_contents_files() {
+	_OPTIONS="${_OPTIONS:+$_OPTIONS }-l"
+	$_CONF_SEARCH_FILE_MANAGER $(dirname $(_git_contents_search_current) | sort -u)
+}
+_search_git_contents_get_type() {
 	case $_CONF_SEARCH_CONTENTS_TYPE in
 	string)
 		_OPTIONS="${_OPTIONS:+$_OPTIONS }-F"
@@ -827,29 +1018,7 @@ _search_contents_get_type() {
 		;;
 	esac
 }
-_search_filenames() {
-	[ "$_SEARCH_EDIT" ] && _POST_ARGS="-exec $_CONF_SEARCH_EDITOR {} +"
-	[ "$_SEARCH_XEDIT" ] && _POST_ARGS="-exec $_CONF_SEARCH_XEDITOR {} +"
-	[ "$_SEARCH_FILES" ] && _POST_ARGS="-execdir $_CONF_SEARCH_FILE_MANAGER {} ;"
-	for _ARG in "$@"; do
-		case $_ARG in
-		-i)
-			_CASE_INSENSITIVE_SEARCH=i
-			;;
-		*)
-			_FIND_ARGS="-and ( -${_CASE_INSENSITIVE_SEARCH}name $_ARG -or -${_CASE_INSENSITIVE_SEARCH}path $_ARG )"
-			;;
-		esac
-	done
-	local search_path=$_PROJECT_PATH_PWD
-	[ $search_path ] && search_path=. || {
-		[ $_SEARCH_RECURSIVE ] && search_path=$PWD || search_path=.
-	}
-	find $search_path \
-		\( -type f -or -type l \) -and ! -path '*/.git/*' \
-		$_FIND_ARGS $_POST_ARGS
-}
-_search_logs() {
+_search_git_logs() {
 	if [ $# -eq 0 ]; then
 		_warn "Not searching logs as no search argument was provided."
 		return
@@ -869,22 +1038,22 @@ _search_logs() {
 		esac
 	done
 	if [ "$_SEARCH_ALL_BRANCHES" ]; then
-		_search_logs_all
+		_search_git_logs_all
 		return
 	fi
-	_search_logs_do
+	_search_git_logs_do
 }
-_search_logs_do() {
+_search_git_logs_do() {
 	git log $_SEARCH_BRANCH $_OPTIONS --grep="$_LOGS_SEARCH"
 }
-_search_logs_all() {
-	for _SEARCH_BRANCH in $(gb); do
+_search_git_logs_all() {
+	for _SEARCH_BRANCH in $(git branch); do
 		_detail "Searching logs in $_SEARCH_BRANCH"
 		_search_logs_do
 	done
 }
-_search_tags() {
-	git tag | grep $_OPTIONS "$_CONTENTS_SEARCH"
+_search_git_tags() {
+	git tag | grep --color $_OPTIONS "$1"
 }
 _require_file() {
 	if [ -z "$1" ]; then
@@ -927,6 +1096,9 @@ _in_application_data_path() {
 }
 _in_data_path() {
 	_in_path $_CONF_INSTALL_DATA_PATH
+}
+_remove_empty_directories() {
+	find $1 -type d -empty -exec rm -rf {} +
 }
 _time_seconds_to_human_readable() {
 	_HUMAN_READABLE_TIME=$(printf '%02d:%02d:%02d' $(($1 / 3600)) $(($1 % 3600 / 60)) $(($1 % 60)))
@@ -994,13 +1166,16 @@ _timeout() {
 		timeout_level=warn
 	fi
 	local sudo_prefix
-	[ $_USE_SUDO ] && {
+	if [ -n "$_USE_SUDO" ] && [ -n "$_SUDO_CMD" ]; then
+		if [ -z "$_NON_INTERACTIVE" ]; then
+			$_SUDO_CMD -n ls >/dev/null 2>&1 || _sudo_precmd "$@"
+		fi
 		[ -z "$USER" ] && USER=$(whoami)
 		[ "$USER" != "root" ] && {
 			sudo_prefix=$_SUDO_CMD
 			[ $_PRESERVE_ENV ] && sudo_prefix="$sudo_prefix -E"
 		}
-	}
+	fi
 	$sudo_prefix timeout $_OPTIONS $timeout "$@" || {
 		local error_status=$?
 		local error_message="Other error"
@@ -1017,6 +1192,7 @@ _sed_safe() {
 }
 _PROJECT_BASE_PATH=$(_readlink ~/projects)
 _DATA_BASE_PATH=$(_readlink ~/.data)
+SYSTEM=$(head -1 /usr/local/etc/walterjwhite/system 2>/dev/null)
 _git_save() {
 	local _message="$1"
 	shift
@@ -1053,7 +1229,7 @@ _git_in_working_directory() {
 }
 _git_relative_path() {
 	_HOME_SED_SAFE=$(_sed_safe $(_readlink $HOME))
-	_PROJECT_RELATIVE_PATH=$(pwd | sed -e "s/$_HOME_SED_SAFE//")
+	_PROJECT_RELATIVE_PATH=$(pwd | sed -e "s/$_HOME_SED_SAFE\///")
 }
 _in_path() {
 	_require "$1" _in_path
@@ -1066,49 +1242,19 @@ _in_application_data_path() {
 _in_data_path() {
 	_in_path $_CONF_INSTALL_DATA_PATH
 }
-_get_local_relative_path() {
-	if [ $(readlink -f $PWD | grep -c $_PROJECT_BASE_PATH) -gt 0 ]; then
-		_PROJECT_RELATIVE_PATH=$(_get_local_relative_path_filter "$_PROJECT_BASE_PATH")
-		_PROJECT_PATH=$_PROJECT_BASE_PATH/$_PROJECT_RELATIVE_PATH
-		_PROJECT_PATH_PWD=$(_get_local_relative_path_filter "$_PROJECT_PATH")
-	elif [ $(readlink -f $PWD | grep -c $_DATA_BASE_PATH) -gt 0 ]; then
-		_PROJECT_RELATIVE_PATH=$(_get_local_relative_path_filter "$_DATA_BASE_PATH")
-		_PROJECT_PATH=$_DATA_BASE_PATH/$_PROJECT_RELATIVE_PATH
-		_PROJECT_PATH_PWD=$(_get_local_relative_path_filter "$_PROJECT_PATH")
-	else
-		_error "Outside $_PROJECT_BASE_PATH | $_DATA_BASE_PATH directory, unable to find project directory @ $(_readlink $PWD)"
-	fi
-	_PROJECT_PATH_SED_SAFE=$(_sed_safe $_PROJECT_PATH)
-}
-_get_local_relative_path_filter() {
-	local _sed_safe=$(_sed_safe $1)
-	printf '%s' "$(readlink -f $PWD)" | sed -e "s/^.*$_sed_safe//" -e "s/^\///"
+_remove_empty_directories() {
+	find $1 -type d -empty -exec rm -rf {} +
 }
 _get_project_directory() {
-	if [ -n "$_PROJECT" ]; then
-		return
+	[ -n "$_PROJECT" ] && return
+	_PROJECT_PATH=$(git rev-parse --show-toplevel 2>/dev/null)
+	local status=$?
+	if [ $status -gt 0 ]; then
+		unset _PROJECT_PATH
+		return $status
 	fi
-	local opwd=$PWD
-	while [ 1 ]; do
-		if [ -e .git ]; then
-			_get_local_relative_path && {
-				_PROJECT=$(basename $_PROJECT_PATH)
-				cd $opwd
-				return
-			}
-			_error "Unable to get project directory: $PWD"
-		fi
-		_git_in_project_base_path || {
-			_in_data_path || {
-				local project_log_level=error
-				[ "$_GIT_WARN" ] && project_log_level=warn
-				_$project_log_level "Outside $_PROJECT_BASE_PATH | $_DATA_BASE_PATH directory, unable to find project directory @ $(_readlink $PWD)"
-				cd $opwd
-				return 1
-			}
-		}
-		cd ..
-	done
+	_PROJECT=$(basename $_PROJECT_PATH)
+	return 0
 }
 _require_file() {
 	if [ -z "$1" ]; then
@@ -1151,6 +1297,9 @@ _in_application_data_path() {
 }
 _in_data_path() {
 	_in_path $_CONF_INSTALL_DATA_PATH
+}
+_remove_empty_directories() {
+	find $1 -type d -empty -exec rm -rf {} +
 }
 _time_seconds_to_human_readable() {
 	_HUMAN_READABLE_TIME=$(printf '%02d:%02d:%02d' $(($1 / 3600)) $(($1 % 3600 / 60)) $(($1 % 60)))
@@ -1218,13 +1367,16 @@ _timeout() {
 		timeout_level=warn
 	fi
 	local sudo_prefix
-	[ $_USE_SUDO ] && {
+	if [ -n "$_USE_SUDO" ] && [ -n "$_SUDO_CMD" ]; then
+		if [ -z "$_NON_INTERACTIVE" ]; then
+			$_SUDO_CMD -n ls >/dev/null 2>&1 || _sudo_precmd "$@"
+		fi
 		[ -z "$USER" ] && USER=$(whoami)
 		[ "$USER" != "root" ] && {
 			sudo_prefix=$_SUDO_CMD
 			[ $_PRESERVE_ENV ] && sudo_prefix="$sudo_prefix -E"
 		}
-	}
+	fi
 	$sudo_prefix timeout $_OPTIONS $timeout "$@" || {
 		local error_status=$?
 		local error_message="Other error"
@@ -1241,6 +1393,7 @@ _sed_safe() {
 }
 _PROJECT_BASE_PATH=$(_readlink ~/projects)
 _DATA_BASE_PATH=$(_readlink ~/.data)
+SYSTEM=$(head -1 /usr/local/etc/walterjwhite/system 2>/dev/null)
 _git_save() {
 	local _message="$1"
 	shift
@@ -1277,7 +1430,7 @@ _git_in_working_directory() {
 }
 _git_relative_path() {
 	_HOME_SED_SAFE=$(_sed_safe $(_readlink $HOME))
-	_PROJECT_RELATIVE_PATH=$(pwd | sed -e "s/$_HOME_SED_SAFE//")
+	_PROJECT_RELATIVE_PATH=$(pwd | sed -e "s/$_HOME_SED_SAFE\///")
 }
 case $_DETECTED_PLATFORM in
 $_PLATFORM) ;;
@@ -1308,9 +1461,10 @@ for _ARG in "$@"; do
 		_kill ${_ARG#*=}
 		_success "Killed ${_ARG#*=}"
 		;;
-	-l)
+	-lr)
 		_list
 		_success "listed running processes"
+		shift
 		;;
 	-lg)
 		_list_group
@@ -1386,13 +1540,17 @@ else
 	_debug "NO _REQUIRED_ARGUMENTS args"
 	unset _DISCOVERED_REQUIRED_ARGUMENTS _DISCOVERED_ARGUMENT_COUNT
 fi
-if [ $# -eq 0 ]; then
-	_error "Expecting at least 1 argument, search term"
+if [ "$(whoami)" = "root" ]; then
+	if [ -n "$_SUDO_CMD" ]; then
+		_SUDO_NORMAL_USER_CMD="$_SUDO_CMD -u $USER"
+	fi
 fi
-if [ -z "$_SEARCH_SCOPE" ]; then
-	(_git_in_project_base_path || _in_data_path) && {
-		_GIT_WARN=1 _get_project_directory && _SEARCH_SCOPE=base || _SEARCH_SCOPE=recursive
-	} || _SEARCH_SCOPE=all
-fi
+[ $# -eq 0 ] && _error "Expecting at least 1 argument, search term"
+_SEARCH_FUNCTION=$(printf '%s' "$_SEARCH_TYPE" | tr '/' '_')
+_SEARCH_SUPER_TYPE=$(printf '%s' "$_SEARCH_TYPE" | sed -e 's/\/.*$//')
+[ -z "$_SEARCH_SCOPE" ] && _get_search_${_SEARCH_SUPER_TYPE}_scope
 _info "Search ($_SEARCH_SCOPE | $(basename $PWD)): $*"
-_search_${_SEARCH_SCOPE} "$@"
+_SEARCH_SCOPE_FUNCTION=$(printf '%s' "$_SEARCH_SCOPE" | sed -e 's/\./wd/')
+_call _search_${_SEARCH_SUPER_TYPE}_${_SEARCH_SCOPE_FUNCTION} "$@" || {
+	[ $? -eq 127 ] && _error "Invalid search type or search scope: ${_SEARCH_SUPER_TYPE} | ${_SEARCH_SCOPE_FUNCTION}"
+}

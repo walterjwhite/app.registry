@@ -1,6 +1,8 @@
 #!/bin/sh
 set -a
 _APPLICATION_NAME='domain-blocks'
+_CONF_INSTALL_CRONTAB_ROOT_PATH=/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/local/sbin:/opt/bin\n\n
+_CONF_INSTALL_CRONTAB_USER_PATH=PATH=/usr/local/bin:/usr/bin:/bin:/opt/bin\n\n
 _PLATFORM="FreeBSD"
 _TAR_ARGS=" -f - "
 _SUDO_CMD="sudo"
@@ -16,9 +18,9 @@ _PYPI_PACKAGE="python39 py39-pip"
 _GO_PACKAGE="go"
 GOPATH=/usr/local
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
-if [ "$HOME" = "/" ]; then
-	HOME=/root
-fi
+: ${_CONF_INSTALL_SUDO_BEEP_TONE:=L32aL8fL32c}
+: ${_CONF_INSTALL_CONTEXT:=$_CONSOLE_CONTEXT_ID}
+: ${_CONF_INSTALL_CONTEXT:=default}
 : ${_CONF_INSTALL_C_ALRT:="1;31m"}
 : ${_CONF_INSTALL_C_ERR:="1;31m"}
 : ${_CONF_INSTALL_C_SCS:="1;32m"}
@@ -27,12 +29,8 @@ fi
 : ${_CONF_INSTALL_C_DETAIL:="1;0;36m"}
 : ${_CONF_INSTALL_C_DEBUG:="1;35m"}
 : ${_CONF_INSTALL_C_STDIN:="1;34m"}
-: ${_CONF_INSTALL_AUDIT:=0}
-: ${_CONF_INSTALL_LOG_LEVEL:=2}
 : ${_CONF_INSTALL_DATE_FORMAT:="%Y/%m/%d|%H:%M:%S"}
 : ${_CONF_INSTALL_DATE_TIME_FORMAT:="%Y/%m/%d %H:%M:%S"}
-: ${_CONF_INSTALL_WAIT_INTERVAL:=30}
-: ${_CONF_INSTALL_NO_PAGER:=0}
 : ${_CONF_INSTALL_BEEP_TIMEOUT:=5}
 : ${_CONF_INSTALL_BEEP_ERR:='L32c'}
 : ${_CONF_INSTALL_BEEP_ALRT:='L32f'}
@@ -42,24 +40,11 @@ fi
 : ${_CONF_INSTALL_BEEP_DETAIL:=''}
 : ${_CONF_INSTALL_BEEP_DEBUG:=''}
 : ${_CONF_INSTALL_BEEP_STDIN:='L32ab'}
-: ${_CONF_INSTALL_SYSTEM_TEMPLATE_PATH:=/usr/share/git/templates}
-: ${_CONF_INSTALL_LIBRARY_PATH:=/usr/local/walterjwhite}
-: ${_CONF_INSTALL_BIN_PATH:=/usr/local/bin}
-: ${_CONF_INSTALL_CONTEXT:=$_CONSOLE_CONTEXT_ID}
-: ${_CONF_INSTALL_CONTEXT:=default}
-: ${_CONF_INSTALL_DATA_PATH:=$HOME/.data}
-: ${_CONF_INSTALL_CACHE_PATH:=$_CONF_INSTALL_DATA_PATH/.cache}
-: ${_CONF_INSTALL_CONFIG_PATH:=$HOME/.config/walterjwhite}
-: ${_CONF_INSTALL_STEP_TIMEOUT:=300}
-: ${_CONF_INSTALL_CONF_VALIDATION_FUNCTION:=_warn}
+: ${_CONF_INSTALL_AUDIT:=0}
+: ${_CONF_INSTALL_LOG_LEVEL:=2}
 : ${_CONF_INSTALL_INDENT:="  "}
-: ${_CONF_INSTALL_FEATURE_TIMEOUT_ERROR_LEVEL:=warn}
-case $(ps -o stat= -p $$) in
-*+*) ;;
-*)
-	_BACKGROUNDED=1
-	;;
-esac
+: ${_CONF_INSTALL_CONF_VALIDATION_FUNCTION:=_warn}
+: ${_CONF_INSTALL_WAITER_LEVEL:=_debug}
 if [ -z "$_NON_INTERACTIVE" ]; then
 	tty >/dev/null || _NON_INTERACTIVE=0
 fi
@@ -74,15 +59,17 @@ else
 	_LOG_TARGET=8
 	_NLOG_TARGET=2
 fi
-: ${_CONF_INSTALL_WAITER_LEVEL:=_debug}
-: ${_CONF_INSTALL_IOSTAT_DURATION:=5}
-which pgrep >/dev/null 2>&1 && _PARENT_PROCESSES_FUNCTION=_parent_processes_pgrep
-_DETECTED_PLATFORM=$(uname)
-case $_DETECTED_PLATFORM in
-Darwin)
-	_DETECTED_PLATFORM=Apple
+: ${_CONF_INSTALL_FEATURE_TIMEOUT_ERROR_LEVEL:=warn}
+: ${_CONF_INSTALL_WAIT_INTERVAL:=30}
+: ${_CONF_INSTALL_NO_PAGER:=0}
+: ${_CONF_INSTALL_STEP_TIMEOUT:=300}
+case $(ps -o stat= -p $$) in
+*+*) ;;
+*)
+	_BACKGROUNDED=1
 	;;
 esac
+: ${_CONF_INSTALL_IOSTAT_DURATION:=5}
 : ${_CONF_INSTALL_REPOSITORY_URL:=https://github.com/walterjwhite}
 : ${_CONF_INSTALL_MIRROR_URLS:=https://github.com/walterjwhite}
 : ${_CONF_INSTALL_SUDO_TIMEOUT:=270}
@@ -90,18 +77,40 @@ esac
 : ${_CONF_INSTALL_NETWORK_TEST_TIMEOUT:=5}
 : ${_CONF_INSTALL_TEAMS_MESSAGE_PARALLELIZATION:=5}
 : ${_CONF_INSTALL_PARALLEL_BUILD:=8}
-: ${_CONF_INSTALL_APP_REGISTRY_GIT_URL:=github.com/walterjwhite/app.registry.git}
+: ${_CONF_INSTALL_APP_REGISTRY_GIT_URL:=https://github.com/walterjwhite/app.registry.git}
+: ${_CONF_INSTALL_AUTO_UPDATE_PACKAGES:=1}
+: ${_CONF_INSTALL_CLEAN_APP_REGISTRY_WORKSPACE=1}
+: ${_CONF_INSTALL_RANDOM_DEFAULT_LENGTH=8}
+if [ "$HOME" = "/" ]; then
+	HOME=/root
+fi
+: ${_CONF_INSTALL_SYSTEM_TEMPLATE_PATH:=/usr/share/git/templates}
+: ${_CONF_INSTALL_LIBRARY_PATH:=/usr/local/walterjwhite}
+: ${_CONF_INSTALL_BIN_PATH:=/usr/local/bin}
+: ${_CONF_INSTALL_DATA_PATH:=$HOME/.data}
+: ${_CONF_INSTALL_CACHE_PATH:=$_CONF_INSTALL_DATA_PATH/.cache}
+: ${_CONF_INSTALL_CONFIG_PATH:=$HOME/.config/walterjwhite}
 : ${_CONF_INSTALL_RUN_PATH:=/tmp/$USER/walterjwhite/app}
 _CONF_INSTALL_DATA_ARTIFACTS_PATH=$_CONF_INSTALL_DATA_PATH/install/artifacts
 _CONF_INSTALL_DATA_REGISTRY_PATH=$_CONF_INSTALL_DATA_PATH/install/registry
 _CONF_INSTALL_APPLICATION_DATA_PATH=$_CONF_INSTALL_DATA_PATH/$_APPLICATION_NAME
 _CONF_INSTALL_APPLICATION_CONFIG_PATH=$_CONF_INSTALL_CONFIG_PATH/$_APPLICATION_NAME
 _CONF_INSTALL_APPLICATION_LIBRARY_PATH=$_CONF_INSTALL_LIBRARY_PATH/$_APPLICATION_NAME
+which pgrep >/dev/null 2>&1 && _PARENT_PROCESSES_FUNCTION=_parent_processes_pgrep
+_DETECTED_PLATFORM=$(uname)
+case $_DETECTED_PLATFORM in
+Darwin)
+	_DETECTED_PLATFORM=Apple
+	;;
+esac
 : ${_CONF_DOMAIN_BLOCKS_CONFIGURATION_PATH:=/usr/local/etc/walterjwhite/network}
-: ${_CONF_DOMAIN_BLOCKS_BLACKLIST:=$_CONF_DOMAIN_BLOCKS_CONFIGURATION_PATH/blacklist}
-: ${_CONF_DOMAIN_BLOCKS_BLACKLIST_AGGREGATE:=$_CONF_DOMAIN_BLOCKS_BLACKLIST/.aggregate}
-: ${_CONF_DOMAIN_BLOCKS_WHITELIST:=$_CONF_DOMAIN_BLOCKS_CONFIGURATION_PATH/whitelist}
-: ${_CONF_DOMAIN_BLOCKS_WHITELIST_AGGREGATE:=$_CONF_DOMAIN_BLOCKS_WHITELIST/.aggregate}
+: ${_CONF_DOMAIN_BLOCKS_BLOCKLIST:=$_CONF_DOMAIN_BLOCKS_CONFIGURATION_PATH/blocklist}
+: ${_CONF_DOMAIN_BLOCKS_BLOCKLIST_AGGREGATE:=$_CONF_DOMAIN_BLOCKS_BLOCKLIST/.aggregate}
+: ${_CONF_DOMAIN_BLOCKS_ALLOWLIST:=$_CONF_DOMAIN_BLOCKS_CONFIGURATION_PATH/allowlist}
+: ${_CONF_DOMAIN_BLOCKS_ALLOWLIST_AGGREGATE:=$_CONF_DOMAIN_BLOCKS_ALLOWLIST/.aggregate}
+: ${_CONF_DOMAIN_BLOCKS_AGGREGATE:=$_CONF_DOMAIN_BLOCKS_CONFIGURATION_PATH/.aggregate}
+: ${_CONF_DOMAIN_BLOCKS_DNSMASQ_BLOCKS:=$_CONF_DOMAIN_BLOCKS_CONFIGURATION_PATH/dnsmasq.block}
+: ${_CONF_DOMAIN_BLOCKS_COREDNS_BLOCKS:=$_CONF_DOMAIN_BLOCKS_CONFIGURATION_PATH/coredns.block}
 : ${_CONF_DOMAIN_BLOCKS_CURL_CONNECT_TIMEOUT:=5}
 : ${_CONF_DOMAIN_BLOCKS_PARALLEL_WORKERS:=10}
 _beep() {
@@ -120,6 +129,13 @@ _do_beep() {
 }
 _beep_done() {
 	unset _BEEPING
+}
+_sudo_precmd() {
+	_beep $_CONF_INSTALL_SUDO_BEEP_TONE
+}
+_interactive_alert() {
+	which notify-send >/dev/null 2>&1 || return 1
+	[ $XAUTHORITY ] && notify-send -e "$*"
 }
 _mktemp() {
 	mktemp -t ${_APPLICATION_NAME}.${_APPLICATION_CMD}.$1
@@ -142,9 +158,7 @@ _get_defaults() {
 		-exec $_CONF_INSTALL_GNU_GREP -Poh "_CONF_${app_name}_[\w_\d]{3,}" {} + 2>/dev/null | sort -u
 }
 _variable_is_set() {
-	if [ $(env | grep "^$1=.*$" | wc -l) -gt 0 ]; then
-		return 0
-	fi
+	[ $(env | grep "^$1=.*$" | wc -l) -gt 0 ] && return 0
 	return 1
 }
 _has_required_conf() {
@@ -189,7 +203,6 @@ _disable_feature() {
 	if [ -z "$_FEATURE_DISABLED" ]; then
 		_warn "Error installing feature: $_FEATURE ($1)"
 	fi
-
 	printf '%s\n' $(_feature_key $1)_DISABLED=1 | _metadata_write
 }
 _is_feature_enabled() {
@@ -232,7 +245,14 @@ _read_if() {
 	fi
 	[ $_NON_INTERACTIVE ] && _error "Running in non-interactive mode and user input was requested: $@" 10
 	_print_log 9 STDI "$_CONF_INSTALL_C_STDIN" "$_CONF_INSTALL_BEEP_STDIN" "$1 $3"
+	_interactive_alert_if $1 $3
 	read -r $2
+}
+_interactive_alert_if() {
+	_is_interactive_alert_enabled && _interactive_alert "$@"
+}
+_is_interactive_alert_enabled() {
+	grep -cq '^_OPTN_INSTALL_INTERACTIVE_ALERT=1$' $_CONF_INSTALL_APPLICATION_CONFIG_PATH 2>/dev/null
 }
 _read_ifs() {
 	stty -echo
@@ -241,12 +261,14 @@ _read_ifs() {
 }
 _continue_if() {
 	_read_if "$1" _PROCEED "$2"
-	if [ -z "$_PROCEED" ]; then
+	local proceed="$_PROCEED"
+	unset _PROCEED
+	if [ -z "$proceed" ]; then
 		_DEFAULT=$(printf '%s' $2 | awk -F'/' {'print$1'})
-		_PROCEED=$_DEFAULT
+		proceed=$_DEFAULT
 	fi
-	_PROCEED=$(printf '%s' "$_PROCEED" | tr '[:lower:]' '[:upper:]')
-	if [ $_PROCEED = "N" ]; then
+	local proceed=$(printf '%s' "$proceed" | tr '[:lower:]' '[:upper:]')
+	if [ $proceed = "N" ]; then
 		return 1
 	fi
 	return 0
@@ -278,11 +300,11 @@ _() {
 	fi
 }
 _optional_include() {
-	if [ -e $1 ]; then
-		. $1
-	else
+	if [ ! -e $1 ]; then
 		_debug "_optional_include: $1 does NOT exist"
+		return 1
 	fi
+	. $1
 }
 _configure() {
 	_optional_include $1
@@ -323,11 +345,7 @@ _contains_argument() {
 	return 1
 }
 _write() {
-	if [ -z "$1" ]; then
-		_error "filename cannot be empty."
-	fi
-	$_SUDO_CMD mkdir -p $(dirname "$1")
-	$_SUDO_CMD tee -a "$1" >/dev/null
+	_sudo tee -a "$1" >/dev/null
 }
 _print_help() {
 	if [ -e $2 ]; then
@@ -387,7 +405,7 @@ _detail() {
 	_print_log 2 DTL "$_CONF_INSTALL_C_DETAIL" "$_CONF_INSTALL_BEEP_DETAIL" "$1"
 }
 _debug() {
-	_print_log 1 DBG "$_CONF_INSTALL_C_DEBUG" "$_CONF_INSTALL_BEEP_DEBUG" "$1"
+	_print_log 1 DBG "$_CONF_INSTALL_C_DEBUG" "$_CONF_INSTALL_BEEP_DEBUG" "($$) $1"
 }
 _do_log() {
 	:
@@ -417,7 +435,7 @@ _print_log() {
 	if [ $_level -lt $_CONF_INSTALL_LOG_LEVEL ]; then
 		return
 	fi
-	[ -n "$_LOGGING_CONTEXT" ] && _message="$_LOGGING_CONTEXT - ${_LOG_INDENT}$_message"
+	[ -n "$_LOGGING_CONTEXT" ] && _message="$_LOGGING_CONTEXT - $_message"
 	local _message_date_time=$(date +"$_CONF_INSTALL_DATE_FORMAT")
 	if [ $_BACKGROUNDED ] && [ $_OPTN_INSTALL_BACKGROUND_NOTIFICATION_METHOD ]; then
 		$_OPTN_INSTALL_BACKGROUND_NOTIFICATION_METHOD "$_slevel" "$_message" &
@@ -455,9 +473,7 @@ _increase_indent() {
 }
 _decrease_indent() {
 	_LOG_INDENT=$(printf '%s' "$_LOG_INDENT" | sed -e "s/${_CONF_INSTALL_INDENT}$//")
-	if [ ${#_LOG_INDENT} -eq 0 ]; then
-		unset _LOG_INDENT
-	fi
+	[ ${#_LOG_INDENT} -eq 0 ] && _reset_indent
 }
 _reset_indent() {
 	unset _LOG_INDENT
@@ -475,9 +491,7 @@ _log_non_interactive() {
 _log_interactive() {
 	[ $_NO_WRITE_STDERR ] && return
 	_is_open $_LOG_TARGET || return
-	if [ $_NON_INTERACTIVE ] && [ -z $_LOGFILE ]; then
-		return
-	fi
+	[ $_NON_INTERACTIVE ] && [ -z $_LOGFILE ] && return
 	if [ $_CONF_INSTALL_AUDIT -gt 0 ]; then
 		printf >&$_LOG_TARGET '\033[%s%s \033[0m%s %s\n' "$1" "$2" "$3" "$4"
 	else
@@ -499,9 +513,6 @@ _log_app_init() {
 _log_app() {
 	_$_log_level "$_APPLICATION_NAME:$_APPLICATION_CMD:$_APPLICATION_VERSION $_APPLICATION_BUILD_DATE / $_APPLICATION_INSTALL_DATE - $1 ($$)"
 }
-_syslog() {
-	:
-}
 _mail() {
 	if [ $# -lt 3 ]; then
 		_warn "recipients[0], subject[1], message[2] is required - $# arguments provided"
@@ -514,6 +525,93 @@ _mail() {
 	local message="$1"
 	shift
 	printf "$message" | mail -s "$subject" $recipients
+}
+_time_seconds_to_human_readable() {
+	_HUMAN_READABLE_TIME=$(printf '%02d:%02d:%02d' $(($1 / 3600)) $(($1 % 3600 / 60)) $(($1 % 60)))
+}
+_time_human_readable_to_seconds() {
+	case $1 in
+	*w)
+		_TIME_IN_SECONDS=${1%%w}
+		_TIME_IN_SECONDS=$(($_TIME_IN_SECONDS * 3600 * 8 * 5))
+		;;
+	*d)
+		_TIME_IN_SECONDS=${1%%d}
+		_TIME_IN_SECONDS=$(($_TIME_IN_SECONDS * 3600 * 8))
+		;;
+	*h)
+		_TIME_IN_SECONDS=${1%%h}
+		_TIME_IN_SECONDS=$(($_TIME_IN_SECONDS * 3600))
+		;;
+	*m)
+		_TIME_IN_SECONDS=${1%%m}
+		_TIME_IN_SECONDS=$(($_TIME_IN_SECONDS * 60))
+		;;
+	*s)
+		_TIME_IN_SECONDS=${1%%s}
+		;;
+	*)
+		_error "$1 was not understood"
+		;;
+	esac
+}
+_time_decade() {
+	local year=$(date +%Y)
+	local _end_year=$(printf '%s' $year | head -c 4 | tail -c 1)
+	local _event_decade_prefix=$(printf '%s' "$year" | $_CONF_INSTALL_GNU_GREP -Po "[0-9]{3}")
+	if [ "$_end_year" -eq "0" ]; then
+		_event_decade_start=${_event_decade_prefix}
+		_event_decade_start=$(printf '%s' "$_event_decade_start-1" | bc)
+		_event_decade_end=${_event_decade_prefix}0
+	else
+		_event_decade_start=$_event_decade_prefix
+		_event_decade_end=$_event_decade_prefix
+		_event_decade_end=$(printf '%s' "$_event_decade_end+1" | bc)
+		_event_decade_end="${_event_decade_end}0"
+	fi
+	_event_decade_start=${_event_decade_start}1
+	printf '%s-%s' "$_event_decade_start" "$_event_decade_end"
+}
+_current_time() {
+	date +$_CONF_INSTALL_DATE_TIME_FORMAT
+}
+_current_time_unix_epoch() {
+	date +%s
+}
+_timeout() {
+	local timeout=$1
+	shift
+	local message=$1
+	shift
+	local timeout_units='s'
+	if [ $(printf '%s' "$timeout" | grep -c '[smhd]{1}') -gt 0 ]; then
+		unset timeout_units
+	fi
+	local timeout_level=error
+	if [ $_WARN ]; then
+		timeout_level=warn
+	fi
+	local sudo_prefix
+	if [ -n "$_USE_SUDO" ] && [ -n "$_SUDO_CMD" ]; then
+		if [ -z "$_NON_INTERACTIVE" ]; then
+			$_SUDO_CMD -n ls >/dev/null 2>&1 || _sudo_precmd "$@"
+		fi
+		[ -z "$USER" ] && USER=$(whoami)
+		[ "$USER" != "root" ] && {
+			sudo_prefix=$_SUDO_CMD
+			[ $_PRESERVE_ENV ] && sudo_prefix="$sudo_prefix -E"
+		}
+	fi
+	$sudo_prefix timeout $_OPTIONS $timeout "$@" || {
+		local error_status=$?
+		local error_message="Other error"
+		if [ $error_status -eq 124 ]; then
+			error_message="Timed Out"
+		fi
+		[ $_TIMEOUT_ERR_FUNCTION ] && $_TIMEOUT_ERR_FUNCTION
+		_$timeout_level "_timeout: $error_message: ${timeout}${timeout_units} - $message ($error_status): $sudo_prefix timeout $_OPTIONS $timeout $* ($USER)"
+		return $error_status
+	}
 }
 _on_exit() {
 	[ $_EXIT ] && return 1
@@ -535,14 +633,13 @@ _on_exit() {
 	_on_exit_beep
 }
 _defer() {
+	_debug "deferring: $1"
 	_DEFERS="${_DEFERS:+$_DEFERS }$1"
 }
 _on_exit_beep() {
 	local current_time=$(date +%s)
 	local timeout=$(($current_time + $_CONF_INSTALL_BEEP_TIMEOUT))
-	if [ $current_time -le $timeout ]; then
-		return 1
-	fi
+	[ $current_time -le $timeout ] && return 1
 	local beep_code
 	if [ $_EXIT_STATUS -gt 0 ]; then
 		beep_code="$_CONF_INSTALL_BEEP_ERR"
@@ -565,17 +662,21 @@ _init_application_context() {
 	_APPLICATION_PIPE_DIR=$(dirname $_APPLICATION_PIPE)
 	mkdir -p $_APPLICATION_PIPE_DIR
 	mkfifo $_APPLICATION_PIPE
-	if [ "$_APPLICATION_NAME" != "install" ]; then
-		_configure $_CONF_INSTALL_CONFIG_PATH/install
-	fi
-	_configure $_CONF_INSTALL_APPLICATION_CONFIG_PATH
-	if [ -n "$_CONFIGURATIONS" ]; then
-		local configure
-		for configure in $_CONFIGURATIONS; do
-			_configure $_CONF_INSTALL_CONFIG_PATH/$configure
-		done
-	fi
+	_init_configuration
 	$_CONF_INSTALL_WAITER_LEVEL "($_APPLICATION_CMD) Please use -w=$$"
+}
+_init_configuration() {
+	if [ -z "$_CONFIGURATIONS" ]; then
+		if [ "$_APPLICATION_NAME" != "install" ]; then
+			_configure $_CONF_INSTALL_CONFIG_PATH/install
+		fi
+		_configure $_CONF_INSTALL_APPLICATION_CONFIG_PATH
+		return 1
+	fi
+	local configure
+	for configure in $(printf '%s\n' $_CONFIGURATIONS); do
+		_configure $_CONF_INSTALL_CONFIG_PATH/$configure
+	done
 }
 _has_other_instances() {
 	if [ $(find $_APPLICATION_CMD_DIR -type p -maxdepth 1 ! -name $$ | wc -l) -gt 0 ]; then
@@ -609,7 +710,7 @@ _waiter() {
 			if [ ! -e $_UPSTREAM_APPLICATION_PIPE ]; then
 				_error "Upstream pipe no longer exists"
 			fi
-			_UPSTREAM_APPLICATION_STATUS=$(timeout $_CONF_INSTALL_WAIT_INTERVAL cat $_UPSTREAM_APPLICATION_PIPE 2>/dev/null)
+			_UPSTREAM_APPLICATION_STATUS=$(_timeout $_CONF_INSTALL_WAIT_INTERVAL "_waiter:upstream" cat $_UPSTREAM_APPLICATION_PIPE 2>/dev/null)
 			local _UPSTREAM_STATUS=$?
 			if [ $_UPSTREAM_STATUS -eq 0 ]; then
 				if [ -z "$_UPSTREAM_APPLICATION_STATUS" ] || [ $_UPSTREAM_APPLICATION_STATUS -gt 0 ]; then
@@ -666,19 +767,59 @@ _init_pager() {
 		PAGER=cat
 	fi
 }
-. $_CONF_INSTALL_LIBRARY_PATH/$_APPLICATION_NAME
-_strip() {
+_random() {
+	local length=$_CONF_INSTALL_RANDOM_DEFAULT_LENGTH
+	[ -n "$1" ] && {
+		length=$1
+		shift
+	}
+	openssl rand -base64 $length
+}
+_sudo() {
+	if [ "$1" = "$_SUDO_CMD" ]; then
+		shift
+	fi
+	if [ $# -eq 0 ]; then
+		return
+	fi
+	if [ -z "$_SUDO_CMD" ]; then
+		$@
+		return
+	fi
+	if [ -z "$_NON_INTERACTIVE" ]; then
+		$_SUDO_CMD -n ls >/dev/null 2>&1 || _sudo_precmd "$@"
+	fi
+	$_SUDO_CMD $_SUDO_OPTIONS "$@"
+}
+_defer_cleanup_temp() {
+	[ -z "$_TMP_CLEANUP_DEFERS" ] && _defer _cleanup_temp
+	_TMP_CLEANUP_DEFERS="${_TMP_CLEANUP_DEFERS:+$_TMP_CLEANUP_DEFERS }$1"
+}
+_cleanup_temp() {
+	if [ -n "$_TMP_CLEANUP_DEFERS" ]; then
+		rm -rf $_TMP_CLEANUP_DEFERS
+		unset _TMP_CLEANUP_DEFERS
+	fi
+}
+_configure $_CONF_INSTALL_LIBRARY_PATH/$_APPLICATION_NAME/.metadata
+_domain_blocks_strip() {
 	$_CONF_INSTALL_GNU_GREP -Pv "(^#.*$|^$|^localhost$)" | sed -e "s/\r//"
 }
-_filter() {
+_domain_blocks_filter() {
 	cat
 }
-_install() {
+_domain_blocks_install() {
 	_NAME=$(basename $0 | sed -e 's/\.sh//' -e 's/\.run//')
 	_info "Updating $_NAME rules"
-	local target_file=$_CONF_DOMAIN_BLOCKS_BLACKLIST/$_NAME
-	$_SUDO_CMD mkdir -p $(dirname $target_file)
-	curl --connect-timeout $_CONF_DOMAIN_BLOCKS_CURL_CONNECT_TIMEOUT -s $1 | _strip | _filter | sort -u | $_SUDO_CMD tee $target_file >/dev/null
+	local target_file=$_CONF_DOMAIN_BLOCKS_BLOCKLIST/$_NAME
+	_sudo mkdir -p $(dirname $target_file)
+	curl --connect-timeout $_CONF_DOMAIN_BLOCKS_CURL_CONNECT_TIMEOUT -s $1 | _domain_blocks_strip | _domain_blocks_filter | sort -u | _sudo tee $target_file >/dev/null
+}
+_domain_blocks_aggregate() {
+	_sudo mkdir -p $1
+	find $1 -type f ! -name '.aggregate' -exec cat {} \; 2>/dev/null |
+		$_CONF_INSTALL_GNU_GREP -Pv "^(#|$)" |
+		sort -u | _sudo tee $1/.aggregate >/dev/null 2>&1
 }
 case $_DETECTED_PLATFORM in
 $_PLATFORM) ;;
@@ -709,9 +850,10 @@ for _ARG in "$@"; do
 		_kill ${_ARG#*=}
 		_success "Killed ${_ARG#*=}"
 		;;
-	-l)
+	-lr)
 		_list
 		_success "listed running processes"
+		shift
 		;;
 	-lg)
 		_list_group
@@ -787,4 +929,9 @@ else
 	_debug "NO _REQUIRED_ARGUMENTS args"
 	unset _DISCOVERED_REQUIRED_ARGUMENTS _DISCOVERED_ARGUMENT_COUNT
 fi
-_install https://blocklistproject.github.io/Lists/alt-version/abuse-nl.txt
+if [ "$(whoami)" = "root" ]; then
+	if [ -n "$_SUDO_CMD" ]; then
+		_SUDO_NORMAL_USER_CMD="$_SUDO_CMD -u $USER"
+	fi
+fi
+_domain_blocks_install https://blocklistproject.github.io/Lists/alt-version/abuse-nl.txt

@@ -1,0 +1,13 @@
+_SUDO_CMD="sudo"
+_ARCHITECTURE=$(uname -m)
+_INSTALL_INSTALLER=pkg
+_PLATFORM_PACKAGES="git gsed gnugrep gtar gawk"
+_NPM_PACKAGE="npm"
+_RUST_PACKAGE="rust"
+_PYPI_DISABLED=1
+_PYPI_PACKAGE="python39 py39-pip"
+_GO_PACKAGE="go123"
+GOPATH=/usr/local
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
+_CONF_INSTALL_STAT_ARGUMENTS='-f %OLp'
+_PACKAGE_OPTIONS="-yq"

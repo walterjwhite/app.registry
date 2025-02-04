@@ -1,10 +1,8 @@
 #!/bin/sh
-#-
 #
 #
 #
 #
-############################################################ INCLUDES
 unset debug
 if [ $_CONF_INSTALL_LOG_LEVEL -eq 0 ]; then
 	set -x
@@ -16,16 +14,32 @@ BSDCFG_SHARE="/usr/share/bsdconfig"
 f_dprintf "%s: loading includes..." "$0"
 f_include $BSDCFG_SHARE/dialog.subr
 f_include $BSDCFG_SHARE/variable.subr
-############################################################ CONFIGURATION
 #
 #
 : ${ZFSBOOT_POOL_NAME:=zroot}
-############################################################ GLOBALS
 : ${TMPDIR:="/tmp"}
 #
 #
 msg_installation_error="Installation Error!"
-############################################################ FUNCTIONS
+_walterjwhite_prepare_chroot() {
+	tar cpf - $_CONF_INSTALL_LIBRARY_PATH | tar xpf - -C $BSDINSTALL_CHROOT
+	mkdir -p ${BSDINSTALL_CHROOT}${_CONF_INSTALL_BIN_PATH}
+	for _app in $(find $_CONF_INSTALL_LIBRARY_PATH -maxdepth 2 -type f -name '.files'); do
+		while read _FILE; do
+			tar cpf - $_FILE | tar xpf - -C $BSDINSTALL_CHROOT
+		done <$_app
+	done
+	unset _app
+	cp $_CONF_INSTALL_BIN_PATH/app-install ${BSDINSTALL_CHROOT}${_CONF_INSTALL_BIN_PATH}
+	mkdir -p $BSDINSTALL_CHROOT/root/.config/walterjwhite
+	cp /root/.config/walterjwhite/* $BSDINSTALL_CHROOT/root/.config/walterjwhite
+	$_CONF_INSTALL_GNU_SED -i '/_BOOTSTRAP_/d' $BSDINSTALL_CHROOT/$_CONF_INSTALL_LIBRARY_PATH/install/.metadata
+	mkdir -p $BSDINSTALL_CHROOT/tmp/HOST-SSH
+	cp $_SSH_KEY $_SSH_KEY.pub $BSDINSTALL_CHROOT/tmp/HOST-SSH
+	cp /etc/ssh/sshd_config $BSDINSTALL_CHROOT/etc/ssh/sshd_config
+	mkdir -p $BSDINSTALL_CHROOT/var/cache/pkg
+	sshfs -o StrictHostKeyChecking=no $_CONF_FREEBSD_INSTALLER_PACKAGE_CACHE:/var/cache/pkg $BSDINSTALL_CHROOT/var/cache/pkg
+}
 error() {
 	local file
 	f_getvar "$VAR_DEBUG_FILE#+" file
@@ -41,7 +55,6 @@ error() {
 	fi
 	exit 1
 }
-############################################################ MAIN
 set -e
 trap error EXIT
 SCRIPT="$1"
@@ -53,9 +66,6 @@ rm -rf $BSDINSTALL_TMPETC
 mkdir $BSDINSTALL_TMPETC
 resolvconf -u
 . $SCRIPT
-### walterjwhite - freebsd-installer.end
-: ${DISTRIBUTIONS="kernel.txz base.txz"}
-export DISTRIBUTIONS
 export BSDINSTALL_DISTDIR
 if [ "$BSDINSTALL_LOG" != "${debugFile#+}" ]; then
 	export debugFile="$BSDINSTALL_LOG"
@@ -65,9 +75,7 @@ fi
 rm -f $PATH_FSTAB
 touch $PATH_FSTAB
 if [ "$ZFSBOOT_DISKS" ]; then
-	### walterjwhite - freebsd-installer.start
-	bsdinstall zfsboot.walterjwhite
-	### walterjwhite - freebsd-installer.end
+	bsdinstall zfsboot
 else
 	bsdinstall scriptedpart "$PARTITIONS"
 fi
@@ -88,27 +96,13 @@ else
 		mkdir -p $BSDINSTALL_CHROOT/boot/efi
 	done
 fi
-### walterjwhite - freebsd-installer.start
-tar cpf - $_CONF_INSTALL_LIBRARY_PATH | tar xpf - -C $BSDINSTALL_CHROOT
-mkdir -p $BSDINSTALL_CHROOT/usr/local/bin
-for _app in $(find $_CONF_INSTALL_LIBRARY_PATH -maxdepth 2 -type f -name '.files'); do
-	while read _FILE; do
-		tar cpf - $_FILE | tar xpf - -C $BSDINSTALL_CHROOT
-	done <$_app
-done
-unset _app
-cp /usr/local/bin/app-install $BSDINSTALL_CHROOT/usr/local/bin
-mkdir -p $BSDINSTALL_CHROOT/root/.config/walterjwhite
-cp /root/.config/walterjwhite/* $BSDINSTALL_CHROOT/root/.config/walterjwhite
-mkdir -p $BSDINSTALL_CHROOT/tmp/HOST-SSH
-cp $_SSH_KEY $_SSH_KEY.pub $BSDINSTALL_CHROOT/tmp/HOST-SSH
-### walterjwhite - freebsd-installer.end
 bsdinstall bootconfig
 bsdinstall config
 if [ ! -f $BSDINSTALL_CHROOT/etc/resolv.conf -a -f /etc/resolv.conf ]; then
 	cp /etc/resolv.conf $BSDINSTALL_CHROOT/etc/resolv.conf
 fi
 if [ -f $POST_INSTALL_SCRIPT ]; then
+	_walterjwhite_prepare_chroot
 	cp $POST_INSTALL_SCRIPT $BSDINSTALL_CHROOT/tmp/installscript
 	chmod a+x $BSDINSTALL_CHROOT/tmp/installscript
 	mount -t devfs devfs "$BSDINSTALL_CHROOT/dev"
@@ -117,12 +111,10 @@ if [ -f $POST_INSTALL_SCRIPT ]; then
 	rm $BSDINSTALL_CHROOT/tmp/installscript
 fi
 bsdinstall entropy
+bsdinstall umount
 if [ "$ZFSBOOT_DISKS" ]; then
 	zpool export $ZFSBOOT_POOL_NAME
 fi
-bsdinstall umount
 f_dprintf "Installation Completed at %s" "$(date)"
 trap - EXIT
 exit $SUCCESS
-################################################################################
-################################################################################

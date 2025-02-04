@@ -1,0 +1,17 @@
+: ${GENTOO_STAGE3_TYPE:="hardened-openrc"}
+: ${GENTOO_KERNEL:=gentoo-kernel}
+: ${GENTOO_INIT:=dracut}
+: ${GENTOO_BOOT_LOADER:=efibootmgr}
+: ${GENTOO_CRON:=cronie}
+: ${GENTOO_SYSLOG:=sysklogd}
+: ${GENTOO_SYSLOG_USE:=logrotate}
+: ${GENTOO_INDEXING:=plocate}
+: ${GENTOO_L10N:="en en-US"}
+: ${GENTOO_LUKS_CIPHER:=aes-xts-plain}
+: ${GENTOO_LUKS_KEY_SIZE:=512}
+: ${GENTOO_LUKS_HASH:=sha512}
+: ${GENTOO_SOFTWARE_LICENSE:="@FREE @BINARY-REDISTRIBUTABLE"}
+: ${GENTOO_TIME_SYNCHRONIZATION:=chrony}
+: ${GENTOO_KERNEL:=gentoo-kernel}
+: ${GENTOO_KERNEL_CMDLINE_ARGS:="consoleblank=300 quiet"}
+: ${_CONF_GENTOO_INSTALLER_SYSTEM_IDENTIFICATION:="/usr/local/etc/walterjwhite/system"}

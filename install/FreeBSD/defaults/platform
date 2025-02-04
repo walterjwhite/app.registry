@@ -1,0 +1,4 @@
+_PLATFORM="FreeBSD"
+_TAR_ARGS=" -f - "
+: ${_CONF_INSTALL_GNU_GREP:=/usr/local/bin/grep}
+: ${_CONF_INSTALL_GNU_SED:=gsed}
